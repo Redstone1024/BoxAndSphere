@@ -2,9 +2,9 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "Network Byte Stream",
+	"FriendlyName": "Fixed Point Math",
 	"Description": "",
-	"Category": "Networking",
+	"Category": "Math",
 	"CreatedBy": "_Redstone_c_",
 	"CreatedByURL": "",
 	"DocsURL": "",
@@ -16,7 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "NetworkByteStream",
+			"Name": "FixedPointMath",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

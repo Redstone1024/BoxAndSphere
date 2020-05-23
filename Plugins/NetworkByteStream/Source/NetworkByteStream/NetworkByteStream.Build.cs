@@ -7,8 +7,25 @@ public class NetworkByteStream : ModuleRules
 	public NetworkByteStream(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-        
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "Sockets", "Networking" });
 
+        PublicDependencyModuleNames.AddRange(
+            new string[] 
+            {
+                "Core",
+            }
+            );
+
+        PrivateDependencyModuleNames.AddRange(
+            new string[] 
+            {
+                "CoreUObject",
+                "Engine",
+                "InputCore",
+                "HeadMountedDisplay",
+                "Sockets",
+                "Networking",
+            }
+            );
+        
     }
 }

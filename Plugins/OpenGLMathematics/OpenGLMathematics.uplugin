@@ -2,21 +2,21 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "Network Byte Stream",
-	"Description": "",
-	"Category": "Networking",
-	"CreatedBy": "_Redstone_c_",
-	"CreatedByURL": "",
+	"FriendlyName": "OpenGL Mathematics [GLM]",
+	"Description": "A C++ mathematics library for graphics programming",
+	"Category": "Math",
+	"CreatedBy": "g-truc",
+	"CreatedByURL": "https://github.com/g-truc/glm",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"CanContainContent": false,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "NetworkByteStream",
+			"Name": "OpenGLMathematics",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
