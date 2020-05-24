@@ -27,7 +27,9 @@ int64 UBytesHelper::BytesToInt64(const TArray<uint8>& Data)
 
 FString UBytesHelper::CharToString(uint8 Data)
 {
-	return FString(Data + "\0");
+	FString Result = "T";
+	Result[0] = Data;
+	return Result;
 }
 
 uint8 UBytesHelper::StringToChar(const FString & Data)

@@ -22,6 +22,8 @@ class NETWORKBYTESTREAM_API FConnectClientMaker
 {
 public:
 	virtual TSharedPtr<FByteStream> Construct(const FString& IP, unsigned short Port, uint8 Pact = 0 /* 此处与服务器部分ID相同 */) = 0;
+
+	virtual ~FConnectClientMaker() { }
 };
 
 class NETWORKBYTESTREAM_API FConnectServerMaker
@@ -29,4 +31,6 @@ class NETWORKBYTESTREAM_API FConnectServerMaker
 public:
 	virtual uint8 GetPactID() { return 0 /* 此处与客户端部分ID相同 */; }
 	virtual TSharedPtr<FByteStream> Construct(TSharedPtr<class FSocket> Sock) = 0;
+
+	virtual ~FConnectServerMaker() { }
 };
