@@ -11,12 +11,12 @@
 #include "Interfaces/IPv4/IPv4Address.h"
 #include "HAL/RunnableThread.h"
 
-FConnectListener::FConnectListener(const FString & pIP, unsigned short pPort, const FAvailablePactsType & pAvailablePacts)
-	: IP(pIP)
+FConnectListener::FConnectListener(const FString & IP, unsigned short pPort, const FAvailablePactsType & pAvailablePacts)
+	: IPStr(IP)
 	, Port(pPort)
 	, Listening(false)
 {
-	UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Build Complete"));
+	UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Build Complete"));
 
 	for (auto& x : pAvailablePacts)
 		AvailablePacts.Add(x->GetPactID(), x);
@@ -32,18 +32,18 @@ bool FConnectListener::Start()
 	if (ListenThread != nullptr && Listening) return true;
 	if (ListenThread != nullptr) Stop();
 
-	FIPv4Address IPv4;
-	FIPv4Address::Parse(IP, IPv4);
+	FIPv4Address IP;
+	FIPv4Address::Parse(IPStr, IP);
 	
 	TSharedPtr<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
-	Addr->SetIp(IPv4.Value);
+	Addr->SetIp(IP.Value);
 	Addr->SetPort(Port);
 
 	TSharedPtr<FSocket> ListenSocket = TSharedPtr<FSocket>(ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("default"), false));
 
 	if (!ListenSocket->Bind(*Addr)) return false;
 
-	UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Bind Success [%s:%d]"), *IP, Port);
+	UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Bind Success [%s:%d]"), *IPStr, Port);
 	ListenThread = TSharedPtr<FRunnableThread>(FRunnableThread::Create(new FListenRunnable(this, ListenSocket), TEXT("ListenRunnable")));
 	return true;
 }
@@ -74,7 +74,7 @@ bool FConnectListener::FListenRunnable::Init()
 uint32 FConnectListener::FListenRunnable::Run()
 {
 	Listener->Listening = true;
-	UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Start"));
+	UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Start"));
 
 	TSharedPtr<FInternetAddr> ClientAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 	TSharedPtr<FSocket> ClientSock;
@@ -87,7 +87,7 @@ uint32 FConnectListener::FListenRunnable::Run()
 	{
 		if (!Socket->Listen(0))
 		{
-			UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Listen Error"));
+			UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Listen Error"));
 			break;
 		}
 
@@ -96,25 +96,25 @@ uint32 FConnectListener::FListenRunnable::Run()
 		if (ClientSock != nullptr)
 		{
 			ClientSock->GetPeerAddress(*ClientAddr);
-			UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Accept [%s]"), *ClientAddr->ToString(true));
+			UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Accept [%s]"), *ClientAddr->ToString(true));
 
 			if (!ClientSock->Wait(ESocketWaitConditions::WaitForRead, FTimespan::FromSeconds(1)))
 			{
-				UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Recv Timeout [%s]"), *ClientAddr->ToString(true));
+				UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Recv Timeout [%s]"), *ClientAddr->ToString(true));
 				ClientSock = nullptr;
 				continue;
 			}
 
 			if (!ClientSock->Recv(&TypeNumber, 1, BytesRead) || BytesRead != 1)
 			{
-				UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Recv Error [%s]"), *ClientAddr->ToString(true));
+				UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Recv Error [%s]"), *ClientAddr->ToString(true));
 				ClientSock = nullptr;
 				continue;
 			}
 
 			if (!Listener->AvailablePacts.Contains(TypeNumber))
 			{
-				UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener Unknown Pact [%s]"), *ClientAddr->ToString(true));
+				UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Unknown Pact [%s]"), *ClientAddr->ToString(true));
 				ClientSock = nullptr;
 				continue;
 			}
@@ -122,11 +122,11 @@ uint32 FConnectListener::FListenRunnable::Run()
 			ClientByteStream = Listener->AvailablePacts[TypeNumber]->Construct(ClientSock);
 			if (ClientByteStream)
 			{
-				UE_LOG(LogNetworkByteStream, Log, TEXT("Byte Stream Construct Success [%s]"), *ClientAddr->ToString(true));
+				UE_LOG(LogNetworkByteStream, Log, TEXT("Byte Stream [%s] Construct Success In ConnectListener"), *ClientAddr->ToString(true));
 				Listener->ConnectionQueue.Enqueue(ClientByteStream);
 			}
 			else
-				UE_LOG(LogNetworkByteStream, Log, TEXT("Byte Stream Construct Fail [%s]"), *ClientAddr->ToString(true)); 
+				UE_LOG(LogNetworkByteStream, Log, TEXT("Byte Stream [%s] Construct Fail In ConnectListener"), *ClientAddr->ToString(true));
 
 		}
 
@@ -134,18 +134,20 @@ uint32 FConnectListener::FListenRunnable::Run()
 		ClientSock = nullptr;
 	}
 
-	UE_LOG(LogNetworkByteStream, Log, TEXT("FConnectListener End"));
+	UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener End"));
 	Listener->Listening = false;
 	return 0;
 }
 
 void FConnectListener::FListenRunnable::Stop()
 {
+	Socket->Shutdown(ESocketShutdownMode::ReadWrite);
 	Socket->Close();
 	Stopping = true;
 }
 
 void FConnectListener::FListenRunnable::Exit()
 {
+	Socket->Shutdown(ESocketShutdownMode::ReadWrite);
 	Socket->Close();
 }

@@ -30,4 +30,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static uint8 StringToChar(const FString& Data);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static uint8 ComputeCheck(const TArray<uint8>& Data);
 };

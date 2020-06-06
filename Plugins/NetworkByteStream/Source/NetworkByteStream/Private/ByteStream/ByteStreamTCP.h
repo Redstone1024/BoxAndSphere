@@ -17,12 +17,21 @@ class FByteStreamTCP : public FByteStream
 private:
 	TSharedPtr<FSocket> Sock;
 
-	FByteStreamTCP(TSharedPtr<FSocket> pSock) : Sock(pSock) { };
+	FDateTime LastActiveTime;
+
+	FByteStreamTCP(TSharedPtr<FSocket> pSock) 
+		: Sock(pSock)
+		, LastActiveTime(FDateTime::Now())
+	{ }
 
 public:
 	virtual ~FByteStreamTCP() final { }
 
 	virtual void Send(const TArray<uint8>& Data) final;
-	virtual void Recv(TArray<uint8>& Data) final;
+	virtual void Recv(TArray<uint8>& Data, uint32 MaxBytesRead = UINT32_MAX) final;
+
 	virtual void Update() final;
+
+	virtual FDateTime GetLastActiveTime() final { return LastActiveTime; }
+	
 };

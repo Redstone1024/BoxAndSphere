@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-NETWORKBYTESTREAM_API DECLARE_LOG_CATEGORY_EXTERN(LogNetworkByteStream, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogLockstep, Log, All);
 
-class FNetworkByteStreamModule : public IModuleInterface
+class FLockstepModule : public IModuleInterface
 {
 public:
 

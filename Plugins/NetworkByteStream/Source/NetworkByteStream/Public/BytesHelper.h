@@ -38,3 +38,18 @@
 						((uint64)(*((x) + 5)) << 40) + \
 						((uint64)(*((x) + 6)) << 48) + \
 						((uint64)(*((x) + 7)) << 56)
+
+class FBytesHelper
+{
+public:
+	inline static uint8 ComputeCheck(const TArray<uint8>& Data, int32 BeginIndex = 0, int32 EndIndex = INT32_MAX)
+	{
+		BeginIndex = FMath::Max(0, BeginIndex);
+		EndIndex = FMath::Min(Data.Num(), EndIndex);
+
+		uint8 Check = 0;
+		for (int32 Index = BeginIndex; Index < EndIndex; Index++)
+			Check ^= Data[Index];
+		return Check;
+	}
+};

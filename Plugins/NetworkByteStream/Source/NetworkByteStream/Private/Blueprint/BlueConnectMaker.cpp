@@ -17,6 +17,9 @@ UByteStream* UConnectMaker::Construct(const FString& IP, int Port, EConnectMaker
 	case EConnectMaker::TCP:
 		Maker = TSharedPtr<FConnectClientMaker>(new FConnectClientMakerTCP());
 		break;
+	default:
+		checkNoEntry();
+		break;
 	}
 
 	TSharedPtr<class FByteStream> ByteStreamPtr = Maker->Construct(IP, static_cast<unsigned short>(Port));

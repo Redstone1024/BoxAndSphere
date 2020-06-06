@@ -75,7 +75,7 @@ private:
 
 private:
 
-	FString IP;
+	FString IPStr;
 	unsigned short Port;
 	FAvailablePactsMap AvailablePacts;
 

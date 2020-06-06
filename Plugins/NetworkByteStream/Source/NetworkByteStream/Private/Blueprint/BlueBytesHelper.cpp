@@ -36,3 +36,8 @@ uint8 UBytesHelper::StringToChar(const FString & Data)
 {
 	return static_cast<uint8>(Data[0]);
 }
+
+uint8 UBytesHelper::ComputeCheck(const TArray<uint8>& Data)
+{
+	return FBytesHelper::ComputeCheck(Data);
+}

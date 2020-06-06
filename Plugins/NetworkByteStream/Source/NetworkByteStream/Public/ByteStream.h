@@ -17,8 +17,11 @@ public:
 	virtual ~FByteStream() { }
 
 	virtual void Send(const TArray<uint8>& Data) = 0;
-	virtual void Recv(TArray<uint8>& Data) = 0;
+	virtual void Recv(TArray<uint8>& Data, uint32 MaxBytesRead = UINT32_MAX) = 0;
+
 	virtual void Update() { }
+
+	virtual FDateTime GetLastActiveTime() = 0;
 
 	FByteStream(const FByteStream&) = delete;
 	FByteStream(const FByteStream&&) = delete;

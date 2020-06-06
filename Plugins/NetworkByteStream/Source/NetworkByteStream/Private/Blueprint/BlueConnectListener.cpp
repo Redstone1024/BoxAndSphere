@@ -10,14 +10,18 @@
 
 UConnectListener* UConnectListener::MakeConnectListener(const FString& IP, int Port, EConnectListener Pact)
 {
+	UConnectListener* Result = nullptr;
+
 	switch (Pact)
 	{
 	case EConnectListener::TCP:
 
-		UConnectListener* Result = NewObject<UConnectListener>();
+		Result = NewObject<UConnectListener>();
 		Result->ListenerPtr = TSharedPtr<FConnectListener>(new FConnectListener(IP, static_cast<unsigned short>(Port), { TSharedPtr<FConnectServerMaker>(new FConnectServerMakerTCP()) }));
 		return Result;
-
+	default:
+		checkNoEntry();
+		break;
 	}
 
 	return nullptr;
