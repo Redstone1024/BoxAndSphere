@@ -11,8 +11,9 @@ class LOCKSTEP_API ULockstepParamBase : public UObject
 {
 	GENERATED_BODY()
 
-public:
+	friend class ULockstepManager;
 
+protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) { return true; }
 	virtual bool ToBytes(TArray<uint8>& Data) { return true; }
 };
@@ -26,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
 	TArray<uint8> RawData;
 
+protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) final { RawData = Data; return ParBytes(); }
 	virtual bool ToBytes(TArray<uint8>& Data) final { if (GenBytes()) { Data = RawData; return true; } else { return false; } }
 
@@ -47,6 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
 	int32 Number;
 
+protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) final;
 	virtual bool ToBytes(TArray<uint8>& Data) final;
 };
@@ -60,6 +63,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
 	int64 Number;
 
+protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) final;
 	virtual bool ToBytes(TArray<uint8>& Data) final;
 };
