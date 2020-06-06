@@ -18,6 +18,7 @@ enum class ELockstepError : uint8
 	CheckError,
 	CmdError,
 	ParamError,
+	EventIDError,
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLockstepErrorDelegate, ELockstepError, FailureType);
@@ -116,7 +117,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
 	ELockstepNetMode NetMode = ELockstepNetMode::TCP;
 
-	FTimespan TimeoutLimit = FTimespan::FromSeconds(2);
+	FTimespan TimeoutLimit = FTimespan::FromSeconds(5);
 
 	// ÊÂ¼þ×¢²á
 public:
@@ -178,6 +179,8 @@ private:
 		uint8 Check;
 	};
 
+	bool IsFirstEvent = true;
+	int32 LastEventID;
 	FEvent NewReceivedEvent;
 	int32 NextMessageIndex = 0;
 	TArray<uint8> SendMessage;
@@ -189,4 +192,7 @@ private:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
 	bool SendEvent(FName Name, ULockstepParamBase* Params);
+
+	UFUNCTION(BlueprintCallable, Category = "Lockstep")
+	int32 GetLastEventID() const { return LastEventID; }
 };

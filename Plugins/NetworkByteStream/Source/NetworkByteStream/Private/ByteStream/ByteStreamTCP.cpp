@@ -5,6 +5,13 @@
 
 #include "Sockets.h"
 
+FByteStreamTCP::FByteStreamTCP(TSharedPtr<FSocket> pSock)
+	: Sock(pSock)
+	, LastActiveTime(FDateTime::Now())
+{
+	Sock->SetNoDelay();
+}
+
 void FByteStreamTCP::Send(const TArray<uint8>& Data)
 {
 	int32 BytesSent;

@@ -19,10 +19,7 @@ private:
 
 	FDateTime LastActiveTime;
 
-	FByteStreamTCP(TSharedPtr<FSocket> pSock) 
-		: Sock(pSock)
-		, LastActiveTime(FDateTime::Now())
-	{ }
+	FByteStreamTCP(TSharedPtr<FSocket> pSock);
 
 public:
 	virtual ~FByteStreamTCP() final { }

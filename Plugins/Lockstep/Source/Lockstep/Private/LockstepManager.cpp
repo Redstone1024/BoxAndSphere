@@ -260,6 +260,23 @@ void ULockstepManager::HandlingNetworkReceive()
 
 			NewReceivedEvent.ID = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 0);
 
+			if (IsFirstEvent)
+			{
+				LastEventID = NewReceivedEvent.ID - 1;
+				IsFirstEvent = false;
+			}
+			
+			if (NewReceivedEvent.ID != LastEventID + 1)
+			{
+				UE_LOG(LogLockstep, Warning, TEXT("Time ID jump in '%s'"), *GetFName().ToString());
+				OnThrowError.Broadcast(ELockstepError::EventIDError);
+				Status = ELockstepStatus::Unknown;
+				Stream = nullptr;
+				break;
+			}
+			
+			LastEventID = NewReceivedEvent.ID;
+
 			NewReceivedEvent.CMD = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 4);
 
 			NewReceivedEvent.Params.SetNum(0, false);

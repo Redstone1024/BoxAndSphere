@@ -41,13 +41,27 @@ protected:
 };
 
 UCLASS(BlueprintType)
+class LOCKSTEP_API ULockstepParamBool : public ULockstepParamBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
+	bool Value;
+
+protected:
+	virtual bool FromBytes(const TArray<uint8>& Data) final;
+	virtual bool ToBytes(TArray<uint8>& Data) final;
+};
+
+UCLASS(BlueprintType)
 class LOCKSTEP_API ULockstepParamInt32 : public ULockstepParamBase
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
-	int32 Number;
+	int32 Value;
 
 protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) final;
@@ -61,7 +75,7 @@ class LOCKSTEP_API ULockstepParamInt64 : public ULockstepParamBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
-	int64 Number;
+	int64 Value;
 
 protected:
 	virtual bool FromBytes(const TArray<uint8>& Data) final;
