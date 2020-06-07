@@ -12,7 +12,7 @@
 USTRUCT(BlueprintType)
 struct FLockstepEventSignature : public FTableRowBase
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
 
 public:
 

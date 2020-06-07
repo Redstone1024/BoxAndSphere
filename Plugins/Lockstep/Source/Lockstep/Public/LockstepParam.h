@@ -7,7 +7,7 @@
 #include "LockstepParam.generated.h"
 
 // 锁步事件的参数基类
-UCLASS(BlueprintType)
+UCLASS(Abstract, BlueprintType)
 class LOCKSTEP_API ULockstepParamBase : public UObject
 {
 	GENERATED_BODY()

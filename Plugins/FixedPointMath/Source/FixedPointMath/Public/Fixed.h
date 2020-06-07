@@ -4,14 +4,16 @@
 
 #include "CoreMinimal.h"
 
+// 泛型定点数
 template<size_t DP>
 class FIXEDPOINTMATH_API TFixed
 {
 public:
-	static constexpr int DecimalPrecision = DP;
+	static constexpr size_t DecimalPrecision = DP;
 
 	int64 Data;
 
+	inline TFixed() { };
 	inline TFixed(int64 A) { Data = A * DecimalPrecision; }
 	inline operator int64() const { return Data / DecimalPrecision; }
 
@@ -19,17 +21,17 @@ public:
 		inline operator T() const { return static_cast<T>(Data / DecimalPrecision); }
 
 	BASIC_INT_TYPE_CAST(int8)
-		BASIC_INT_TYPE_CAST(int16)
-		BASIC_INT_TYPE_CAST(int32)
+	BASIC_INT_TYPE_CAST(int16)
+	BASIC_INT_TYPE_CAST(int32)
 
-		BASIC_INT_TYPE_CAST(uint8)
-		BASIC_INT_TYPE_CAST(uint16)
-		BASIC_INT_TYPE_CAST(uint32)
-		BASIC_INT_TYPE_CAST(uint64)
+	BASIC_INT_TYPE_CAST(uint8)
+	BASIC_INT_TYPE_CAST(uint16)
+	BASIC_INT_TYPE_CAST(uint32)
+	BASIC_INT_TYPE_CAST(uint64)
 
 #undef BASIC_INT_TYPE_CAST
 
-		TFixed(float A) { Data = A * DecimalPrecision; }
+	TFixed(float A) { Data = A * DecimalPrecision; }
 	inline operator float() const { return static_cast<float>(Data) / DecimalPrecision; }
 
 	TFixed(double A) { Data = A * DecimalPrecision; }
@@ -40,16 +42,16 @@ public:
 
 #define FIXED_CMP_OP(O) inline bool operator O(const TFixed &RHS) const { return Data O RHS.Data; }
 
-	FIXED_CMP_OP(== )
-		FIXED_CMP_OP(!= )
-		FIXED_CMP_OP(< )
-		FIXED_CMP_OP(> )
-		FIXED_CMP_OP(>= )
-		FIXED_CMP_OP(<= )
+	FIXED_CMP_OP(==)
+	FIXED_CMP_OP(!=)
+	FIXED_CMP_OP(<)
+	FIXED_CMP_OP(>)
+	FIXED_CMP_OP(>=)
+	FIXED_CMP_OP(<=)
 
 #undef FIXED_CMP_OP
 
-		inline bool operator !() const { return !Data; }
+	inline bool operator !() const { return !Data; }
 	inline TFixed operator ~() const { return TFixed(~Data); }
 	inline TFixed &operator ++() { Data += DecimalPrecision; return *this; }
 	inline TFixed &operator --() { Data += DecimalPrecision; return *this; }
@@ -58,19 +60,19 @@ public:
         inline TFixed operator O(const TFixed &RHS) const { TFixed Temp(*this); Temp O##= RHS; return Temp; }
 
 	FIXED_BIN_OP(+)
-		FIXED_BIN_OP(-)
-		FIXED_BIN_OP(&)
-		FIXED_BIN_OP(| )
-		FIXED_BIN_OP(^)
+	FIXED_BIN_OP(-)
+	FIXED_BIN_OP(&)
+	FIXED_BIN_OP(| )
+	FIXED_BIN_OP(^)
 
 #undef FIXED_BIN_OP
 
-		inline TFixed &operator *=(const TFixed &RHS) {
+	inline TFixed &operator *=(const TFixed &RHS) {
 		Data *= RHS.Data;
 		Data /= DecimalPrecision;
 		return *this;
 	}
-	inline TFixed operator *(const TFixed &RHS) { return *this *= RHS; }
+	inline TFixed operator *(const TFixed &RHS) { TFixed Temp(*this); Temp *= RHS; return Temp; }
 
 	inline TFixed &operator /=(const TFixed &RHS) {
 		Data *= DecimalPrecision;
@@ -88,4 +90,5 @@ public:
 
 };
 
+// 实例化一个精度为4096的定点数
 typedef TFixed<4096> FFixed;
