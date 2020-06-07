@@ -37,10 +37,12 @@ ELockstepReturn ULockstepManager::RegisterRound(const FString & IP, int Port, co
 	if (Status != ELockstepStatus::NoConnection)
 		return ELockstepReturn::WrongStatus;
 
+	// 设置连接信息
 	ELockstepReturn Return = SetRoundPass(IP, Port, RoundName, Password);
 	if (Return != ELockstepReturn::Success)
 		return Return;
 
+	// 连接
 	Return = ConnectRound('R');
 
 	if (Return == ELockstepReturn::Success)
@@ -60,10 +62,12 @@ ELockstepReturn ULockstepManager::JoinRound(const FString & IP, int Port, const 
 	if (Status != ELockstepStatus::NoConnection)
 		return ELockstepReturn::WrongStatus;
 
+	// 设置连接信息
 	ELockstepReturn Return = SetRoundPass(IP, Port, RoundName, Password);
 	if (Return != ELockstepReturn::Success)
 		return Return;
 
+	// 连接
 	Return = ConnectRound('L');
 
 	if (Return == ELockstepReturn::Success)
@@ -79,6 +83,7 @@ ELockstepReturn ULockstepManager::JoinRound(const FString & IP, int Port, const 
 
 ELockstepReturn ULockstepManager::SetRoundPass(const FString & IP, int Port, const FString & RoundName, const FString & Password)
 {
+	// 确保参数范围正常
 	if (IP.IsEmpty() || Port <= 0 || Port > UINT16_MAX || RoundName.IsEmpty() || Password.IsEmpty())
 		return ELockstepReturn::ParameterError;
 
@@ -94,6 +99,7 @@ ELockstepReturn ULockstepManager::ConnectRound(uint8 CMD)
 {
 	TSharedPtr<FConnectClientMaker> ConnectMaker;
 
+	// 选择连接模式
 	switch (NetMode)
 	{
 	case ELockstepNetMode::TCP:
@@ -101,13 +107,16 @@ ELockstepReturn ULockstepManager::ConnectRound(uint8 CMD)
 		break;
 	}
 
+	// 连接服务器
 	TSharedPtr<FByteStream> TempStream;
 	TempStream = ConnectMaker->Construct(Pass.IPStr, Pass.Port);
 	if (TempStream == nullptr)
 		return ELockstepReturn::ConnectError;
 
+	// 发送房间请求
 	TempStream->Send({ CMD, INT64TOBYTES(Pass.RoundNumber), INT64TOBYTES(Pass.Password) });
 
+	// 接收返回值
 	TArray<uint8> Return;
 	do 
 	{
@@ -121,6 +130,7 @@ ELockstepReturn ULockstepManager::ConnectRound(uint8 CMD)
 	if (Return.Num() != 1)
 		return ELockstepReturn::Unknown;
 
+	// 处理返回值为枚举
 	switch (Return[0])
 	{
 	case 'T':
@@ -142,15 +152,17 @@ ELockstepReturn ULockstepManager::ConnectRound(uint8 CMD)
 
 void ULockstepManager::InitEventRegistry()
 {
+	// 保证数据为空
 	EventNameToIndex.Empty();
-
 	EventSignatures.Empty();
 	EventDelegates.Empty();
-
 	EventParamObjects.Empty();
 
+	// 先注册系统注册表
 	for (auto& SystemEvent : SystemEventRegistry)
 		RegisterEvent(SystemEvent.Key, SystemEvent.Value);
+
+	// 如果用户注册表存在则注册
 
 	if (!IsValid(EventRegistry))
 		return;
@@ -178,6 +190,7 @@ void ULockstepManager::RegisterEvent(const FName & Name, const FLockstepEventSig
 	int32 NewIndex = EventSignatures.Add(Signature);
 	EventDelegates.SetNum(NewIndex + 1);
 
+	// 当名称未指定时 事件只能通过索引使用
 	if (Name != NAME_None)
 		EventNameToIndex.Add(Name, NewIndex);
 	
@@ -244,29 +257,33 @@ void ULockstepManager::HandlingNetworkReceive()
 
 	check(Stream != nullptr);
 
+	// 接收新消息
 	TempBuffer.SetNum(0, false);
 	Stream->Recv(TempBuffer);
 
 	if (TempBuffer.Num() > 0)
 	{
-
+		// 追加消息到处理缓冲
 		RecvMessage.Append(TempBuffer);
 
+		// 如果未处理的消息长度大于最小消息长度则处理
 		while (RecvMessage.Num() - NextMessageIndex >= 13)
 		{
+			// 处理参数长度
 			int32 ParamsLen = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 8);
 			if (ParamsLen > (RecvMessage.Num() - NextMessageIndex - 1))
 				break;
 
-			NewReceivedEvent.ID = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 0);
+			// 处理参数编号
+			TempEvent.ID = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 0);
 
 			if (IsFirstEvent)
 			{
-				LastEventID = NewReceivedEvent.ID - 1;
+				LastEventID = TempEvent.ID - 1;
 				IsFirstEvent = false;
 			}
 			
-			if (NewReceivedEvent.ID != LastEventID + 1)
+			if (TempEvent.ID != LastEventID + 1)
 			{
 				UE_LOG(LogLockstep, Warning, TEXT("Time ID jump in '%s'"), *GetFName().ToString());
 				OnThrowError.Broadcast(ELockstepError::EventIDError);
@@ -275,49 +292,53 @@ void ULockstepManager::HandlingNetworkReceive()
 				break;
 			}
 			
-			LastEventID = NewReceivedEvent.ID;
+			LastEventID = TempEvent.ID;
 
-			NewReceivedEvent.CMD = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 4);
+			// 读取指令 参数 校验码
+			TempEvent.CMD = BYTESTOINT32(RecvMessage.GetData() + NextMessageIndex + 4);
+			TempEvent.Params.SetNum(0, false);
+			TempEvent.Params.Append(RecvMessage.GetData() + NextMessageIndex + 12, ParamsLen);
+			TempEvent.Check = RecvMessage[NextMessageIndex + 12 + ParamsLen];
 
-			NewReceivedEvent.Params.SetNum(0, false);
-			NewReceivedEvent.Params.Append(RecvMessage.GetData() + NextMessageIndex + 12, ParamsLen);
-
-			NewReceivedEvent.Check = RecvMessage[NextMessageIndex + 12 + ParamsLen];
-
-			if (NewReceivedEvent.Check != FBytesHelper::ComputeCheck(RecvMessage, NextMessageIndex, NextMessageIndex + 12 + ParamsLen))
+			// 验证校验码
+			if (TempEvent.Check != FBytesHelper::ComputeCheck(RecvMessage, NextMessageIndex, NextMessageIndex + 12 + ParamsLen))
 			{
-				UE_LOG(LogLockstep, Warning, TEXT("Event [%d] check error in '%s'"), NewReceivedEvent.ID, *GetFName().ToString());
+				UE_LOG(LogLockstep, Warning, TEXT("Event [%d] check error in '%s'"), TempEvent.ID, *GetFName().ToString());
 				OnThrowError.Broadcast(ELockstepError::CheckError);
 				Status = ELockstepStatus::Unknown;
 				Stream = nullptr;
 				break;
 			}
 
-			if (NewReceivedEvent.CMD < static_cast<uint32>(EventSignatures.Num()))
+			// 验证消息被注册
+			if (TempEvent.CMD < static_cast<uint32>(EventSignatures.Num()))
 			{
-				ULockstepParamBase* ParamObject = EventParamObjects[EventSignatures[NewReceivedEvent.CMD].ParamType];
-				if (ParamObject->FromBytes(NewReceivedEvent.Params))
+				// 验证参数是否可以被解析
+				ULockstepParamBase* ParamObject = EventParamObjects[EventSignatures[TempEvent.CMD].ParamType];
+				if (ParamObject->FromBytes(TempEvent.Params))
 				{
-					EventDelegates[NewReceivedEvent.CMD].Broadcast(ParamObject);
+					EventDelegates[TempEvent.CMD].Broadcast(ParamObject);
 				}
 				else
 				{
-					UE_LOG(LogLockstep, Warning, TEXT("Event parameter resolution failed in '%s'"), NewReceivedEvent.ID, *GetFName().ToString());
+					UE_LOG(LogLockstep, Warning, TEXT("Event parameter resolution failed in '%s'"), TempEvent.ID, *GetFName().ToString());
 					OnThrowError.Broadcast(ELockstepError::ParamError);
 				}
 			}
 			else
 			{
-				UE_LOG(LogLockstep, Warning, TEXT("Event [%d] cmd id [%d] unregistered in '%s'"), NewReceivedEvent.ID, NewReceivedEvent.CMD, *GetFName().ToString());
+				UE_LOG(LogLockstep, Warning, TEXT("Event [%d] cmd id [%d] unregistered in '%s'"), TempEvent.ID, TempEvent.CMD, *GetFName().ToString());
 				OnThrowError.Broadcast(ELockstepError::CmdError);
 			}
 
+			// 将待处理标记后移
 			NextMessageIndex += 12 + ParamsLen + 1;
 		}
 
 	}
 	else
 	{
+		// 检测是否超时
 		if (FDateTime::Now() - Stream->GetLastActiveTime() > TimeoutLimit)
 		{
 			UE_LOG(LogLockstep, Warning, TEXT("Connection timed out in '%s'"), *GetFName().ToString());
@@ -335,8 +356,7 @@ bool ULockstepManager::SendEvent(FName Name, ULockstepParamBase * Params)
 	if (Status != ELockstepStatus::Normal)
 		return false;
 
-	check(Stream != nullptr);
-
+	// 尝试获取事件索引
 	int32 EventIndex;
 	FLockstepEventSignature EventSignature;
 	if (!GetEventInfo(Name, EventIndex, EventSignature))
@@ -345,30 +365,52 @@ bool ULockstepManager::SendEvent(FName Name, ULockstepParamBase * Params)
 		return false;
 	}
 
+	// 获取索引成功则发送
+	return SendEventByIndex(EventIndex, Params);
+}
+
+bool ULockstepManager::SendEventByIndex(int32 Index, ULockstepParamBase * Params)
+{
+	if (Status != ELockstepStatus::Normal)
+		return false;
+
+	check(Stream != nullptr);
+
+	// 尝试获取事件签名
+	FLockstepEventSignature EventSignature;
+	if (!GetEventInfoByIndex(Index, EventSignature))
+	{
+		UE_LOG(LogLockstep, Error, TEXT("Try to send a non-existent event [%d] in '%s'"), Index, *GetFName().ToString());
+		return false;
+	}
+
+	// 检测参数类型是否正确
 	if (Params->GetClass() != EventSignature.ParamType)
 	{
 		UE_LOG(LogLockstep, Error, TEXT("Event parameter types do not match in '%s'"), *GetFName().ToString());
 		return false;
 	}
 
-	FEvent ReadyEvent;
-	if (!Params->ToBytes(ReadyEvent.Params))
+	// 检测参数解析是否正确
+	if (!Params->ToBytes(TempEvent.Params))
 	{
 		UE_LOG(LogLockstep, Error, TEXT("Event parameter generation failed in '%s'"), *GetFName().ToString());
 		return false;
 	}
 
-	ReadyEvent.ID = 0;
-	ReadyEvent.CMD = EventIndex;
+	// 填充事件
+	TempEvent.ID = 0;
+	TempEvent.CMD = Index;
 
 	TempBuffer.SetNum(0, false);
-	TempBuffer.Append({ INT32TOBYTES(ReadyEvent.ID), INT32TOBYTES(ReadyEvent.CMD), INT32TOBYTES(ReadyEvent.Params.Num()) });
-	TempBuffer.Append(ReadyEvent.Params);
+	TempBuffer.Append({ INT32TOBYTES(TempEvent.ID), INT32TOBYTES(TempEvent.CMD), INT32TOBYTES(TempEvent.Params.Num()) });
+	TempBuffer.Append(TempEvent.Params);
 
-	ReadyEvent.Check = FBytesHelper::ComputeCheck(TempBuffer);
-	TempBuffer.Append({ ReadyEvent.Check });
+	TempEvent.Check = FBytesHelper::ComputeCheck(TempBuffer);
+	TempBuffer.Append({ TempEvent.Check });
 	SendMessage.Append(TempBuffer);
-	
+
+	// 发送事件
 	Stream->Send(TempBuffer);
 
 	return true;

@@ -8,6 +8,7 @@
 #include "Templates/SubclassOf.h"
 #include "LockstepEventSignature.generated.h"
 
+// 表示锁步事件的签名
 USTRUCT(BlueprintType)
 struct FLockstepEventSignature : public FTableRowBase
 {
@@ -15,6 +16,7 @@ struct FLockstepEventSignature : public FTableRowBase
 
 public:
 
+	// 参数类型
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
 	TSubclassOf<ULockstepParamBase> ParamType;
 
