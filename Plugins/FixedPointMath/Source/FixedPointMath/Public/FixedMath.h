@@ -13,13 +13,13 @@ public:
 	// 精度转换
 
 	template<size_t DPR, size_t DPP>
-	static TFixed<DPR> PrecConv(TFixed<DPP> A) 
+	static FORCEINLINE TFixed<DPR> PrecConv(TFixed<DPP> A)
 	{
 		if (TFixed<DPR>::DecimalPrecision == TFixed<DPP>::DecimalPrecision)
 			return A;
 
 		TFixed<DPR> Temp;
-		Temp = A.Data;
+		Temp = static_cast<TFixed<DPR>>(A.Data);
 		Temp.Data /= TFixed<DPP>::DecimalPrecision;
 		return Temp;
 	}
@@ -27,13 +27,13 @@ public:
 	// 常用数学
 
 	template<size_t DP>
-	static TFixed<DP> Min(TFixed<DP> A, TFixed<DP> B) { return FMath::Min(A, B); }
+	static FORCEINLINE TFixed<DP> Min(TFixed<DP> A, TFixed<DP> B) { return FMath::Min(A, B); }
 
 	template<size_t DP>
-	static TFixed<DP> Max(TFixed<DP> A, TFixed<DP> B) { return FMath::Max(A, B); }
+	static FORCEINLINE TFixed<DP> Max(TFixed<DP> A, TFixed<DP> B) { return FMath::Max(A, B); }
 
 	template<size_t DP>
-	static TFixed<DP> Clamp(TFixed<DP> Value, TFixed<DP> Min, TFixed<DP> Max) { return FMath::Clamp(Value, Min, Max); }
+	static FORCEINLINE TFixed<DP> Clamp(TFixed<DP> Value, TFixed<DP> Min, TFixed<DP> Max) { return FMath::Clamp(Value, Min, Max); }
 
 	// 三角函数 - 注意！0~1 表示 0~360 度！
 
