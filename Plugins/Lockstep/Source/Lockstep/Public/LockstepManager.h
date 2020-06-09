@@ -8,8 +8,8 @@
 #include "Delegates/DelegateCombinations.h"
 #include "LockstepManager.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FLockstepEventDelegate, ULockstepParamBase*, Params);            // 事件回调
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLockstepEventDelegates, ULockstepParamBase*, Params); // 事件多播回调
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepEventDelegate, int32, EventID, ULockstepParamBase*, Params);            // 事件回调
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepEventDelegates, int32, EventID, ULockstepParamBase*, Params); // 事件多播回调
 
 // 发送的错误类型
 UENUM(BlueprintType)

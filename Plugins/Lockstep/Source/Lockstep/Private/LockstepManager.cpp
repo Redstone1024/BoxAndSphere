@@ -317,7 +317,7 @@ void ULockstepManager::HandlingNetworkReceive()
 				ULockstepParamBase* ParamObject = EventParamObjects[EventSignatures[TempEvent.CMD].ParamType];
 				if (ParamObject->FromBytes(TempEvent.Params))
 				{
-					EventDelegates[TempEvent.CMD].Broadcast(ParamObject);
+					EventDelegates[TempEvent.CMD].Broadcast(TempEvent.ID, ParamObject);
 				}
 				else
 				{
