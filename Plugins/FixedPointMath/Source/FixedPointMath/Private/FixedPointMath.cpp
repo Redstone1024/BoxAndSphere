@@ -2,6 +2,8 @@
 
 #include "FixedPointMath.h"
 
+DEFINE_LOG_CATEGORY(LogFixedPointMath);
+
 #define LOCTEXT_NAMESPACE "FFixedPointMathModule"
 
 void FFixedPointMathModule::StartupModule()

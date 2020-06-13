@@ -26,7 +26,6 @@ class FIXEDPOINTMATH_API UBlueprintFixedMath : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
 public:
-
 	// 类型转换
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "ToFixed (byte)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast), Category = "Math|Conversions")
@@ -53,7 +52,7 @@ public:
 	static FORCEINLINE FFixedPoint Multiply(FFixedPoint A, FFixedPoint B) { return A.Raw * B.Raw; }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "fixed / fixed", CompactNodeTitle = "/", Keywords = "/ divide division"), Category = "Math|Fixed")
-	static FORCEINLINE FFixedPoint Divide(FFixedPoint A, FFixedPoint B) { return A.Raw / (B.Raw == static_cast<FFixed>(0) ? static_cast<FFixed>(1) : B.Raw); }
+	static FORCEINLINE FFixedPoint Divide(FFixedPoint A, FFixedPoint B) { return A.Raw / (B.Raw == FFixed::Zero ? FFixed::One : B.Raw); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "fixed + fixed", CompactNodeTitle = "+", Keywords = "+ add plus", CommutativeAssociativeBinaryOperator = "true"), Category = "Math|Fixed")
 	static FORCEINLINE FFixedPoint Add(FFixedPoint A, FFixedPoint B) { return A.Raw + B.Raw; }
@@ -83,6 +82,9 @@ public:
 
 	// 常用数学
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Absolute (fixed)", CompactNodeTitle = "ABS"), Category = "Math|Fixed")
+	static FORCEINLINE FFixedPoint Abs(FFixedPoint A) { return FFixedMath::Abs(A.Raw); }
+
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Min (fixed)", CompactNodeTitle = "MIN", CommutativeAssociativeBinaryOperator = "true"), Category = "Math|Fixed")
 	static FORCEINLINE FFixedPoint Min(FFixedPoint A, FFixedPoint B) { return FFixedMath::Min(A.Raw, B.Raw); }
 
@@ -90,20 +92,45 @@ public:
 	static FORCEINLINE FFixedPoint Max(FFixedPoint A, FFixedPoint B) { return FFixedMath::Max(A.Raw, B.Raw); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Clamp (fixed)"), Category = "Math|Fixed")
-	static FORCEINLINE FFixedPoint Clamp(FFixedPoint Value, FFixedPoint Min, FFixedPoint Max) { return FFixedMath::Clamp(Value.Raw, static_cast<FFixed>(Min.Raw), static_cast<FFixed>(Max.Raw)); }
+	static FORCEINLINE FFixedPoint Clamp(FFixedPoint Value, FFixedPoint Min, FFixedPoint Max) { return FFixedMath::Clamp(Value.Raw, Min.Raw, Max.Raw); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "InRange (fixed)", Min = "0", Max = "10"), Category = "Math|Fixed")
 	static FORCEINLINE bool InRange(FFixedPoint Value, FFixedPoint Min, FFixedPoint Max, bool InclusiveMin = true, bool InclusiveMax = true) 
 	{ return ((InclusiveMin ? (Value.Raw >= Min.Raw) : (Value.Raw > Min.Raw)) && (InclusiveMax ? (Value.Raw <= Max.Raw) : (Value.Raw < Max.Raw))); }
 
-	// 三角函数 - 注意！0~1 表示 0~360 度！
+	UFUNCTION(BlueprintPure, Category = "Math|Fixed", meta = (Keywords = "square root", CompactNodeTitle = "SQRT"))
+	static FORCEINLINE FFixedPoint Sqrt(FFixedPoint A)  { return FFixedMath::Sqrt(A.Raw); }
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Tan (Fixed)", CompactNodeTitle = "TAN"), Category = "Math|Trig")
-	static FORCEINLINE FFixedPoint Tan(FFixedPoint A) { return FFixedMath::PrecConv<FFixed::DecimalPrecision>(FFixedMath::Tan(FFixedMath::PrecConv<4096>(A.Raw))); }
+	// 三角函数
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Sin (Fixed)", CompactNodeTitle = "SIN"), Category = "Math|Trig")
-	static FORCEINLINE FFixedPoint Sin(FFixedPoint A) { return FFixedMath::PrecConv<FFixed::DecimalPrecision>(FFixedMath::Sin(FFixedMath::PrecConv<4096>(A.Raw))); }
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Get PI (fixed)", CompactNodeTitle = "PI"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint GetPI() { return FFixedMath::GetPI<FFixed::DecimalPrecision>(); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Tan (Radians)", CompactNodeTitle = "TAN"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint Tan(FFixedPoint A) { return FFixedMath::Tan(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Sin (Radians)", CompactNodeTitle = "SIN"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint Sin(FFixedPoint A) { return FFixedMath::Sin(A.Raw); }
 	
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Cos (Fixed)", CompactNodeTitle = "COS"), Category = "Math|Trig")
-	static FORCEINLINE FFixedPoint Cos(FFixedPoint A) { return FFixedMath::PrecConv<FFixed::DecimalPrecision>(FFixedMath::Cos(FFixedMath::PrecConv<4096>(A.Raw))); }
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Cos (Radians)", CompactNodeTitle = "COS"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint Cos(FFixedPoint A) { return FFixedMath::Cos(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Tan (Degrees)", CompactNodeTitle = "TANd"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint TanDeg(FFixedPoint A) { return FFixedMath::TanDeg(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Sin (Degrees)", CompactNodeTitle = "SINd"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint SinDeg(FFixedPoint A) { return FFixedMath::SinDeg(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Cos (Degrees)", CompactNodeTitle = "COSd"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint CosDeg(FFixedPoint A) { return FFixedMath::CosDeg(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Tan (Unit)", CompactNodeTitle = "TANu"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint TanUnit(FFixedPoint A) { return FFixedMath::TanUnit(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Sin (Unit)", CompactNodeTitle = "SINu"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint SinUnit(FFixedPoint A) { return FFixedMath::SinUnit(A.Raw); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Cos (Unit)", CompactNodeTitle = "COSu"), Category = "Math|Trig")
+	static FORCEINLINE FFixedPoint CosUnit(FFixedPoint A) { return FFixedMath::CosUnit(A.Raw); }
+
 };

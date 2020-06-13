@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogFixedPointMath, Log, All);
+
 class FFixedPointMathModule : public IModuleInterface
 {
 public:

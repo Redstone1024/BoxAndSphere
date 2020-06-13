@@ -123,7 +123,7 @@ namespace
 	};
 }
 
-TFixed<4096> FFixedMath::Tan(TFixed<4096> A)
+TFixed<4096> FFixedMath::TanUnitRaw(TFixed<4096> A)
 {
 	TFixed<4096> Result;
 	bool Signed = A.Data < 0;
@@ -133,19 +133,19 @@ TFixed<4096> FFixedMath::Tan(TFixed<4096> A)
 	else if (Temp < 1024)
 		Result.Data = TanTable[Temp];
 	else
-		Result.Data = TanTable[2048 - Temp] * -1;
+		Result.Data = -TanTable[2048 - Temp];
 	Result.Data *= Signed ? -1 : 1;
 	return Result;
 }
 
-TFixed<4096> FFixedMath::Sin(TFixed<4096> A)
+TFixed<4096> FFixedMath::SinUnitRaw(TFixed<4096> A)
 {
 	TFixed<4096> Quarter;
 	Quarter.Data = 1024;
-	return Cos(A - Quarter);
+	return CosUnit(A - Quarter);
 }
 
-TFixed<4096> FFixedMath::Cos(TFixed<4096> A)
+TFixed<4096> FFixedMath::CosUnitRaw(TFixed<4096> A)
 {
 	TFixed<4096> Result;
 	A.Data = FMath::Abs(A.Data);
@@ -155,9 +155,9 @@ TFixed<4096> FFixedMath::Cos(TFixed<4096> A)
 	else if (Signed && Temp < 1024)
 		Result.Data = CosTable[Temp];
 	else if (Signed && Temp >= 1024)
-		Result.Data = CosTable[2048 - Temp] * -1;
+		Result.Data = -CosTable[2048 - Temp];
 	else if (Temp < 1024)
-		Result.Data = CosTable[Temp] * -1;
+		Result.Data = -CosTable[Temp];
 	else
 		Result.Data = CosTable[2048 - Temp];
 	return Result;
