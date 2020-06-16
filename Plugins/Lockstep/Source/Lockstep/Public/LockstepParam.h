@@ -15,8 +15,8 @@ class LOCKSTEP_API ULockstepParamBase : public UObject
 	friend class ULockstepManager;
 
 protected:
-	virtual bool FromBytes(const TArray<uint8>& Data) { return true; } // 从字节解析出参数
-	virtual bool ToBytes(TArray<uint8>& Data) { return true; }         // 将参数解析成字节
+	virtual bool FromBytes(const TArray<uint8>& Data) PURE_VIRTUAL(ULockstepParamBase::FromBytes, return true;); // 从字节解析出参数
+	virtual bool ToBytes(TArray<uint8>& Data) PURE_VIRTUAL(ULockstepParamBase::ToBytes, return true;);           // 将参数解析成字节
 };
 
 // 表示一个靠反射函数解析的锁步参数 用于支持蓝图
