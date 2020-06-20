@@ -12,13 +12,13 @@ class NETWORKBYTESTREAM_API UByteStream : public UObject
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	void Send(const TArray<uint8>& Data);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	void Recv(TArray<uint8>& Data);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	void Update();
 
 	TSharedPtr<class FByteStream> ByteStreamPtr;

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "BlueConnectMaker.generated.h"
 
 class UByteStream;
@@ -15,12 +15,12 @@ enum class EConnectMaker : uint8
 };
 
 UCLASS(BlueprintType)
-class NETWORKBYTESTREAM_API UConnectMaker : public UObject
+class NETWORKBYTESTREAM_API UConnectMaker : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	UByteStream* Construct(const FString& IP, int Port, EConnectMaker Pact);
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
+	static UByteStream* ConnectToListener(const FString& IP, int Port, EConnectMaker Pact);
 
 };

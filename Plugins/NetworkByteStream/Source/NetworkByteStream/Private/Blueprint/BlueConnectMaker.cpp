@@ -8,7 +8,7 @@
 
 class FConnectClientMaker;
 
-UByteStream* UConnectMaker::Construct(const FString& IP, int Port, EConnectMaker Pact)
+UByteStream* UConnectMaker::ConnectToListener(const FString& IP, int Port, EConnectMaker Pact)
 {
 	TSharedPtr<FConnectClientMaker> Maker;
 

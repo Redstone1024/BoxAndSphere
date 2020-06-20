@@ -20,19 +20,19 @@ class NETWORKBYTESTREAM_API UConnectListener : public UObject
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	static UConnectListener* MakeConnectListener(const FString& IP, int Port, EConnectListener Pact);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	bool Start();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	void Stop();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "NetworkByteStream")
 	bool IsListening();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NetworkByteStream")
 	UByteStream* TryGetConnection();
 
 	TSharedPtr<class FConnectListener> ListenerPtr;
