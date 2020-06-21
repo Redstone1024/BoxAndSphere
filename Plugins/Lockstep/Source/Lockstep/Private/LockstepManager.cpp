@@ -320,8 +320,9 @@ void ULockstepManager::HandlingNetworkReceive()
 					// 系统事件特殊处理
 					if (TempEvent.CMD < 16)
 						HandlingSystemEvent(TempEvent, ParamObject);
-					else
-						EventDelegates[TempEvent.CMD].Broadcast(TempEvent.ID, ParamObject);
+
+					// 正常调用事件
+					EventDelegates[TempEvent.CMD].Broadcast(TempEvent.ID, ParamObject);
 				}
 				else
 				{
