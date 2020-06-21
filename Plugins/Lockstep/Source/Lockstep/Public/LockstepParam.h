@@ -15,6 +15,8 @@ class LOCKSTEP_API ULockstepParamBase : public UObject
 	friend class ULockstepManager;
 
 protected:
+	virtual void Reset() { } // 重置为默认参数
+
 	virtual bool FromBytes(const TArray<uint8>& Data) PURE_VIRTUAL(ULockstepParamBase::FromBytes, return true;); // 从字节解析出参数
 	virtual bool ToBytes(TArray<uint8>& Data) PURE_VIRTUAL(ULockstepParamBase::ToBytes, return true;);           // 将参数解析成字节
 };
@@ -30,8 +32,15 @@ public:
 	TArray<uint8> RawData;
 
 protected:
+	virtual void Reset() final { ResetParam(); }
+
 	virtual bool FromBytes(const TArray<uint8>& Data) final { RawData = Data; return ParBytes(); }
 	virtual bool ToBytes(TArray<uint8>& Data) final { if (GenBytes()) { Data = RawData; return true; } else { return false; } }
+
+	// 由蓝图实现 用于重置为默认参数
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Lockstep")
+	void ResetParam();
+	void ResetParam_Implementation() { RawData.Reset(); }
 
 	// 由蓝图实现 用于从字节解析出参数
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Lockstep")
@@ -85,6 +94,23 @@ public:
 	int64 Value;
 
 protected:
+	virtual bool FromBytes(const TArray<uint8>& Data) final;
+	virtual bool ToBytes(TArray<uint8>& Data) final;
+};
+
+// 一个字符串锁步参数
+UCLASS(BlueprintType)
+class LOCKSTEP_API ULockstepParamString : public ULockstepParamBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
+	FString Value;
+
+protected:
+	virtual void Reset() final { Value.Reset(); }
+
 	virtual bool FromBytes(const TArray<uint8>& Data) final;
 	virtual bool ToBytes(TArray<uint8>& Data) final;
 };

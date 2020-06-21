@@ -11,6 +11,9 @@
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepEventDelegate, int32, EventID, ULockstepParamBase*, Params);            // 事件回调
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepEventDelegates, int32, EventID, ULockstepParamBase*, Params); // 事件多播回调
 
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepTickEventDelegate, int32, EventID, int32, TickID);            // Tick事件回调
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepTickEventDelegates, int32, EventID, int32, TickID); // Tick事件多播回调
+
 // 发送的错误类型
 UENUM(BlueprintType)
 enum class ELockstepError : uint8
@@ -138,25 +141,6 @@ public:
 	UDataTable* EventRegistry; // 事件注册表
 
 private:
-	const TArray<TPair<FName, FLockstepEventSignature>> SystemEventRegistry =
-	{
-		TPair<FName, FLockstepEventSignature>(TEXT("Void"), FLockstepEventSignature(ULockstepParamVoid::StaticClass())),  // [00] 空事件主要用于防止误判超时
-		TPair<FName, FLockstepEventSignature>(TEXT("Tick"), FLockstepEventSignature(ULockstepParamInt32::StaticClass())), // [01] Tick事件 由服务器发起
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [02] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [03] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [04] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [05] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [06] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [07] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [08] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [09] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [10] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [11] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [12] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [13] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [14] 保留
-		TPair<FName, FLockstepEventSignature>(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass())),     // [15] 保留
-	};
 
 	TMap<FName, int32> EventNameToIndex; // 事件名称到索引的映射
 	
@@ -219,4 +203,21 @@ public:
 	// 获取最后一个受到的完整事件编号
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
 	int32 GetLastEventID() const { return LastEventID; }
+
+	// 系统事件
+private:
+	FLockstepTickEventDelegates TickEventDelegates; // Tick回调
+
+	void RegisterSystemEvent();                                               // 注册系统事件
+	void HandlingSystemEvent(const FEvent& Event, ULockstepParamBase* Param); // 处理系统事件
+
+public:
+	// 绑定Tick事件回调
+	UFUNCTION(BlueprintCallable, Category = "Lockstep")
+	void BindTickEvent(FLockstepTickEventDelegate Event) { TickEventDelegates.Add(Event); }
+
+	// 发送空事件
+	UFUNCTION(BlueprintCallable, Category = "Lockstep")
+	void SendVoidEvent() { SendEventByIndex(0, nullptr); }
+
 };

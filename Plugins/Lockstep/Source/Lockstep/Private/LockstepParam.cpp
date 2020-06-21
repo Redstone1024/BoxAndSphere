@@ -55,3 +55,30 @@ bool ULockstepParamInt64::ToBytes(TArray<uint8>& Data)
 
 	return true;
 }
+
+bool ULockstepParamString::FromBytes(const TArray<uint8>& Data)
+{
+	if (Data.Num() % 2)
+		return false;
+
+	int Length = Data.Num() / 2;
+	Value.Empty();
+
+	for (int i = 0; i < Length; i++)
+		Value += (TCHAR)(BYTESTOINT16(Data.GetData() + (2 * i)));
+
+	return true;
+}
+
+bool ULockstepParamString::ToBytes(TArray<uint8>& Data)
+{
+	Data.SetNum(Value.Len() * 2, false);
+
+	for (int i = 0; i < Value.Len(); i++)
+	{
+		Data[2 * i + 0] = Value[i] >> 0;
+		Data[2 * i + 1] = Value[i] >> 8;
+	}
+
+	return true;
+}

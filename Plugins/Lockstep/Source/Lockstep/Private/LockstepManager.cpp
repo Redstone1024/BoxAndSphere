@@ -158,12 +158,12 @@ void ULockstepManager::InitEventRegistry()
 	EventDelegates.Empty();
 	EventParamObjects.Empty();
 
-	// 先注册系统注册表
-	for (auto& SystemEvent : SystemEventRegistry)
-		RegisterEvent(SystemEvent.Key, SystemEvent.Value);
+	TickEventDelegates.Clear();
+
+	// 注册系统事件
+	RegisterSystemEvent();
 
 	// 如果用户注册表存在则注册
-
 	if (!IsValid(EventRegistry))
 		return;
 
@@ -317,7 +317,11 @@ void ULockstepManager::HandlingNetworkReceive()
 				ULockstepParamBase* ParamObject = EventParamObjects[EventSignatures[TempEvent.CMD].ParamType];
 				if (ParamObject->FromBytes(TempEvent.Params))
 				{
-					EventDelegates[TempEvent.CMD].Broadcast(TempEvent.ID, ParamObject);
+					// 系统事件特殊处理
+					if (TempEvent.CMD < 16)
+						HandlingSystemEvent(TempEvent, ParamObject);
+					else
+						EventDelegates[TempEvent.CMD].Broadcast(TempEvent.ID, ParamObject);
 				}
 				else
 				{
@@ -384,6 +388,13 @@ bool ULockstepManager::SendEventByIndex(int32 Index, ULockstepParamBase * Params
 		return false;
 	}
 
+	// 如果是空指针则使用默认参数
+	if (!IsValid(Params))
+	{
+		Params = EventParamObjects[EventSignature.ParamType];
+		Params->Reset();
+	}
+
 	// 检测参数类型是否正确
 	if (Params->GetClass() != EventSignature.ParamType)
 	{
@@ -414,4 +425,59 @@ bool ULockstepManager::SendEventByIndex(int32 Index, ULockstepParamBase * Params
 	Stream->Send(TempBuffer);
 
 	return true;
+}
+
+void ULockstepManager::RegisterSystemEvent()
+{
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [00] 空事件
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamInt32::StaticClass())); // [01] Tick事件
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [02]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [03]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [04]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [05]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [06]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [07]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [08]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [09]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [10]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [11]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [12]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [13]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [14]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [15]
+}
+
+void ULockstepManager::HandlingSystemEvent(const FEvent & Event, ULockstepParamBase* Param)
+{
+	switch (Event.CMD)
+	{
+	case 0:
+		break;
+	case 1:
+	{
+		check(Cast<ULockstepParamInt32>(Param));
+		ULockstepParamInt32* ParamInt32 = (ULockstepParamInt32*)Param;
+		TickEventDelegates.Broadcast(Event.ID, ParamInt32->Value);
+		break;
+	}
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+		UE_LOG(LogLockstep, Warning, TEXT("Unknown system event in '%s'"), *GetFName().ToString());
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
 }
