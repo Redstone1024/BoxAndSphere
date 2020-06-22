@@ -93,7 +93,7 @@ uint32 FConnectListener::FListenRunnable::Run()
 
 		ClientSock = TSharedPtr<FSocket>(Socket->Accept(TEXT("")));
 
-		if (ClientSock != nullptr)
+		if (ClientSock != nullptr && !Stopping)
 		{
 			ClientSock->GetPeerAddress(*ClientAddr);
 			UE_LOG(LogNetworkByteStream, Log, TEXT("ConnectListener Accept [%s]"), *ClientAddr->ToString(true));
