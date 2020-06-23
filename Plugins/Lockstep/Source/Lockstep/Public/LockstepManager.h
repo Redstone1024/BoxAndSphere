@@ -9,13 +9,9 @@
 #include "Delegates/DelegateCombinations.h"
 #include "LockstepManager.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepEventDelegate, int32, EventID, ULockstepParamBase*, Params);            // 事件回调
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepEventDelegates, int32, EventID, ULockstepParamBase*, Params); // 事件多播回调
+class UDataTable;
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepTickEventDelegate, int32, EventID, int32, TickID);            // Tick事件回调
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepTickEventDelegates, int32, EventID, int32, TickID); // Tick事件多播回调
-
-// 发送的错误类型
+// 发生的错误类型
 UENUM(BlueprintType)
 enum class ELockstepError : uint8
 {
@@ -25,10 +21,6 @@ enum class ELockstepError : uint8
 	ParamError,   // 参数解析出错
 	EventIDError, // 事件编号跳跃
 };
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLockstepErrorDelegate, ELockstepError, FailureType); // 错误回调
-
-class UDataTable;
 
 // 描述当前的锁步管理器状态
 UENUM(BlueprintType)
@@ -92,9 +84,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
 	ELockstepStatus GetStatus() const { return Status; }
 
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FErrorDelegate, ELockstepError, FailureType); // 错误回调
+
 	// 出现错误时的回调
 	UPROPERTY(BlueprintAssignable, Category = "Lockstep")
-	FLockstepErrorDelegate OnThrowError;
+	FErrorDelegate OnThrowError;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
@@ -154,9 +149,12 @@ public:
 private:
 
 	TMap<FName, int32> EventNameToIndex; // 事件名称到索引的映射
-	
+
 	TArray<FLockstepEventSignature> EventSignatures; // 事件签名
-	TArray<FLockstepEventDelegates> EventDelegates;  // 事件回调
+
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FEventDelegate, int32, EventID, ULockstepParamBase*, Params);            // 事件回调声明
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEventDelegates, int32, EventID, ULockstepParamBase*, Params); // 事件多播回调声明
+	TArray<FEventDelegates> EventDelegates;                                                                     // 事件回调
 
 	UPROPERTY()
 	TMap<TSubclassOf<ULockstepParamBase>, ULockstepParamBase*> EventParamObjects; // 事件参数池
@@ -175,11 +173,11 @@ public:
 
 	// 绑定一个事件的回调
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
-	void BindEvent(FName Name, FLockstepEventDelegate Event);
+	void BindEvent(FName Name, FEventDelegate Event);
 
 	// 通过索引绑定一个事件的回调
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
-	void BindEventByIndex(int32 Index, FLockstepEventDelegate Event);
+	void BindEventByIndex(int32 Index, FEventDelegate Event);
 
 	// 事件处理
 private:
@@ -217,18 +215,22 @@ public:
 
 	// 系统事件
 private:
-	FLockstepTickEventDelegates TickEventDelegates; // Tick回调
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTickDelegate, int32, EventID, int32, TickID); // Tick事件回调
+
+	UPROPERTY(BlueprintAssignable, Category = "Lockstep")
+	FTickDelegate TickDelegate; // Tick回调
 
 	void RegisterSystemEvent();                                               // 注册系统事件
 	void HandlingSystemEvent(const FEvent& Event, ULockstepParamBase* Param); // 处理系统事件
 
 public:
-	// 绑定Tick事件回调
-	UFUNCTION(BlueprintCallable, Category = "Lockstep")
-	void BindTickEvent(FLockstepTickEventDelegate Event) { TickEventDelegates.Add(Event); }
-
 	// 发送空事件
 	UFUNCTION(BlueprintCallable, Category = "Lockstep")
 	void SendVoidEvent() { SendEventByIndex(0, nullptr); }
+
+	// 请求服务器Log
+	UFUNCTION(BlueprintCallable, Category = "Lockstep")
+	void RequestServerLog(FString Message);
 
 };

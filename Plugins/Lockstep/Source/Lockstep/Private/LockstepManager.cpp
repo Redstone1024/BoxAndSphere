@@ -158,8 +158,6 @@ void ULockstepManager::InitEventRegistry()
 	EventDelegates.Empty();
 	EventParamObjects.Empty();
 
-	TickEventDelegates.Clear();
-
 	// 注册系统事件
 	RegisterSystemEvent();
 
@@ -228,7 +226,7 @@ bool ULockstepManager::GetEventInfoByIndex(int32 Index, FLockstepEventSignature 
 	return true;
 }
 
-void ULockstepManager::BindEvent(FName Name, FLockstepEventDelegate Event)
+void ULockstepManager::BindEvent(FName Name, FEventDelegate Event)
 {
 	if (!EventNameToIndex.Contains(Name))
 	{
@@ -239,7 +237,7 @@ void ULockstepManager::BindEvent(FName Name, FLockstepEventDelegate Event)
 	EventDelegates[EventNameToIndex[Name]].Add(Event);
 }
 
-void ULockstepManager::BindEventByIndex(int32 Index, FLockstepEventDelegate Event)
+void ULockstepManager::BindEventByIndex(int32 Index, FEventDelegate Event)
 {
 	if (Index < 0 || EventDelegates.Num() <= Index)
 	{
@@ -432,7 +430,7 @@ void ULockstepManager::RegisterSystemEvent()
 {
 	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [00] 空事件
 	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamInt32::StaticClass())); // [01] Tick事件
-	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [02]
+	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [02] 客户端申请在服务器打印Log
 	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [03]
 	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [04]
 	RegisterEvent(NAME_None, FLockstepEventSignature(ULockstepParamVoid::StaticClass()));  // [05]
@@ -452,16 +450,20 @@ void ULockstepManager::HandlingSystemEvent(const FEvent & Event, ULockstepParamB
 {
 	switch (Event.CMD)
 	{
-	case 0:
+	case 0: // 空事件忽略
 		break;
-	case 1:
+	case 1: // Tick事件
 	{
 		check(Cast<ULockstepParamInt32>(Param));
 		ULockstepParamInt32* ParamInt32 = (ULockstepParamInt32*)Param;
-		TickEventDelegates.Broadcast(Event.ID, ParamInt32->Value);
+		TickDelegate.Broadcast(Event.ID, ParamInt32->Value);
 		break;
 	}
-	case 2:
+	case 2: // 申请一个服务器Log 不应该由服务器发送
+	{
+		UE_LOG(LogLockstep, Warning, TEXT("Tick from the client in '%s'"), *GetFName().ToString());
+		break;
+	}
 	case 3:
 	case 4:
 	case 5:
@@ -481,4 +483,15 @@ void ULockstepManager::HandlingSystemEvent(const FEvent & Event, ULockstepParamB
 		checkNoEntry();
 		break;
 	}
+}
+
+void ULockstepManager::RequestServerLog(FString Message)
+{
+	ULockstepParamVoid* Param = (ULockstepParamVoid*)EventParamObjects[ULockstepParamVoid::StaticClass()];
+	Param->RawData.SetNum(Message.Len(), false);
+
+	for (int i = 0; i < Message.Len(); i++)
+		Param->RawData[i] = Message[i] < UINT8_MAX ? Message[i] : '*';
+
+	SendEventByIndex(2, Param);
 }
