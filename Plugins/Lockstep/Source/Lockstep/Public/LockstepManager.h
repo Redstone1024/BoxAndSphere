@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Tickable.h"
 #include "UObject/NoExportTypes.h"
 #include "LockstepEventSignature.h"
 #include "Delegates/DelegateCombinations.h"
@@ -68,7 +69,7 @@ enum class ELockstepNetMode : uint8
 
 // 锁步系统的中央管理器
 UCLASS(BlueprintType)
-class LOCKSTEP_API ULockstepManager : public UObject
+class LOCKSTEP_API ULockstepManager : public UObject, public FTickableGameObject
 {
 	GENERATED_BODY()
 
@@ -94,6 +95,16 @@ public:
 	// 出现错误时的回调
 	UPROPERTY(BlueprintAssignable, Category = "Lockstep")
 	FLockstepErrorDelegate OnThrowError;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lockstep")
+	bool bAutoUpdate = true; // 开启自动更新
+
+	// Begin FTickableGameObject Interface.
+	virtual void Tick(float DeltaTime) override { Update(); }
+	virtual bool IsTickable() const override { return bAutoUpdate; }
+	virtual TStatId GetStatId() const override { return UObject::GetStatID(); }
+	// End FTickableGameObject Interface.
 
 	// 连接控制
 private:
