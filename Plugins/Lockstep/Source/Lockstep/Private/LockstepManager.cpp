@@ -461,7 +461,7 @@ void ULockstepManager::HandlingSystemEvent(const FEvent & Event, ULockstepParamB
 	}
 	case 2: // 申请一个服务器Log 不应该由服务器发送
 	{
-		UE_LOG(LogLockstep, Warning, TEXT("Tick from the client in '%s'"), *GetFName().ToString());
+		UE_LOG(LogLockstep, Warning, TEXT("Server log from the server in '%s'"), *GetFName().ToString());
 		break;
 	}
 	case 3:
