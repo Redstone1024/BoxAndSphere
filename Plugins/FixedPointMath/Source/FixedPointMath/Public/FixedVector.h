@@ -6,49 +6,53 @@
 
 #include "Fixed.h"
 #include "FixedMath.h"
+#include "FixedVector.generated.h"
 
-template<int64 DP>
-struct FIXEDPOINTMATH_API TFixedVector
+USTRUCT(BlueprintType)
+struct FIXEDPOINTMATH_API FFixedVector
 {
-public:
+	GENERATED_BODY()
 
-	TFixed<DP> X;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fixed Vector", SaveGame)
+	FFixed X;
 
-	TFixed<DP> Y;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fixed Vector", SaveGame)
+	FFixed Y;
 
-	TFixed<DP> Z;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fixed Vector", SaveGame)
+	FFixed Z;
 
-	static const TFixedVector ZeroVector;
-	static const TFixedVector OneVector;
-	static const TFixedVector UpVector;
-	static const TFixedVector DownVector;
-	static const TFixedVector ForwardVector;
-	static const TFixedVector BackwardVector;
-	static const TFixedVector RightVector;
-	static const TFixedVector LeftVector;
+	static const FFixedVector ZeroVector;
+	static const FFixedVector OneVector;
+	static const FFixedVector UpVector;
+	static const FFixedVector DownVector;
+	static const FFixedVector ForwardVector;
+	static const FFixedVector BackwardVector;
+	static const FFixedVector RightVector;
+	static const FFixedVector LeftVector;
 
-	FORCEINLINE TFixedVector() { }
+	FORCEINLINE FFixedVector() { }
 
-	explicit FORCEINLINE TFixedVector(TFixed<DP> InF) : X(InF), Y(InF), Z(InF) { }
+	explicit FORCEINLINE FFixedVector(FFixed InF) : X(InF), Y(InF), Z(InF) { }
 
-	FORCEINLINE TFixedVector(TFixed<DP> InX, TFixed<DP> InY, TFixed<DP> InZ) : X(InX), Y(InY), Z(InZ) { }
+	FORCEINLINE FFixedVector(FFixed InX, FFixed InY, FFixed InZ) : X(InX), Y(InY), Z(InZ) { }
 
-	explicit FORCEINLINE TFixedVector(const FVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
+	explicit FORCEINLINE FFixedVector(const FVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
 
-	explicit FORCEINLINE operator FVector() const { return FVector(X, Y, Z); }
+	explicit FORCEINLINE operator FVector() const { return FVector(static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z)); }
 
-	explicit FORCEINLINE TFixedVector(const FIntVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
+	explicit FORCEINLINE FFixedVector(const FIntVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
 
 	explicit FORCEINLINE operator FIntVector() const { return FIntVector(static_cast<int32>(X), static_cast<int32>(Y), static_cast<int32>(Z)); }
 
-	FORCEINLINE TFixedVector& operator ^=(const TFixedVector& RHS) { *this = *this ^ RHS; return *this; }
+	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& RHS) { *this = *this ^ RHS; return *this; }
 
-	FORCEINLINE TFixedVector operator ^(const TFixedVector& RHS) const { return TFixedVector(Y * RHS.Z - Z * RHS.Y, Z * RHS.X - X * RHS.Z, X * RHS.Y - Y * RHS.X); }
+	FORCEINLINE FFixedVector operator ^(const FFixedVector& RHS) const { return FFixedVector(Y * RHS.Z - Z * RHS.Y, Z * RHS.X - X * RHS.Z, X * RHS.Y - Y * RHS.X); }
 
-	FORCEINLINE TFixed<DP> operator |(const TFixedVector& RHS) const { return X * RHS.X + Y * RHS.Y + Z * RHS.Z; }
+	FORCEINLINE FFixed operator |(const FFixedVector& RHS) const { return X * RHS.X + Y * RHS.Y + Z * RHS.Z; }
 
-#define FIXED_BIN_OP(O) FORCEINLINE TFixedVector &operator O ##=(const TFixedVector &RHS) { X O##= RHS.X; Y O##= RHS.Y; Z O##= RHS.Z; return *this; } \
-        FORCEINLINE TFixedVector operator O(const TFixedVector &RHS) const { TFixedVector Temp(*this); Temp O##= RHS; return Temp; }
+#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector &RHS) { X O##= RHS.X; Y O##= RHS.Y; Z O##= RHS.Z; return *this; } \
+        FORCEINLINE FFixedVector operator O(const FFixedVector &RHS) const { FFixedVector Temp(*this); Temp O##= RHS; return Temp; }
 
 	FIXED_BIN_OP(+)
 	FIXED_BIN_OP(-)
@@ -57,61 +61,34 @@ public:
 
 #undef FIXED_BIN_OP
 
-	FORCEINLINE TFixedVector operator -() const { return TFixedVector(-X, -Y, -Z); }
+	FORCEINLINE FFixedVector operator -() const { return FFixedVector(-X, -Y, -Z); }
 
-	FORCEINLINE bool operator ==(const TFixedVector &RHS) const { return (X == RHS.X) && (Y == RHS.Y) && (Z == RHS.Z); }
+	FORCEINLINE bool operator ==(const FFixedVector& RHS) const { return (X == RHS.X) && (Y == RHS.Y) && (Z == RHS.Z); }
 
-	FORCEINLINE bool operator !=(const TFixedVector &RHS) const { return (X != RHS.X) || (Y != RHS.Y) || (Z != RHS.Z); }
+	FORCEINLINE bool operator !=(const FFixedVector& RHS) const { return (X != RHS.X) || (Y != RHS.Y) || (Z != RHS.Z); }
 
-	FORCEINLINE bool IsZero() const { return X == TFixed<DP>::Zero && Y == TFixed<DP>::Zero && Z == TFixed<DP>::Zero; }
+	FORCEINLINE bool IsZero() const { return X == 0 && Y == 0 && Z == 0; }
 
-	FORCEINLINE TFixed<DP> Length() const { return FFixedMath::PrecConv<DP>(FFixedMath::Sqrt(FFixedMath::PrecConv<65536>(X * X + Y * Y + Z * Z))); }
+	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(X * X + Y * Y + Z * Z); }
 
-	FORCEINLINE TFixed<DP> LengthSquared() const { return X * X + Y * Y + Z * Z; }
+	FORCEINLINE FFixed LengthSquared() const { return X * X + Y * Y + Z * Z; }
 
-	FORCEINLINE TFixedVector<DP> Normalize();
+	FORCEINLINE FFixedVector Normalize();
 
 };
 
-typedef TFixedVector<FFixed::DecimalPrecision> FFixedVector;
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::ZeroVector = TFixedVector<DP>(TFixed<DP>::Zero);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::OneVector = TFixedVector<DP>(TFixed<DP>::One);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::UpVector = TFixedVector<DP>(0, 0, 1);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::DownVector = TFixedVector<DP>(0, 0, -1);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::ForwardVector = TFixedVector<DP>(1, 0, 0);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::BackwardVector = TFixedVector<DP>(-1, 0, 0);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::RightVector = TFixedVector<DP>(0, 1, 0);
-
-template<int64 DP>
-const TFixedVector<DP> TFixedVector<DP>::LeftVector = TFixedVector<DP>(0, -1, 0);
-
-template<int64 DP>
-FORCEINLINE TFixedVector<DP> TFixedVector<DP>::Normalize()
+FORCEINLINE FFixedVector FFixedVector::Normalize()
 {
-	TFixed<DP> SquareSum = LengthSquared();
+	FFixed SquareSum = LengthSquared();
 
-	if (SquareSum < TFixed<DP>::Zero)
+	if (SquareSum < 0)
 	{
 		UE_LOG(LogFixedPointMath, Warning, TEXT("Vector length is too long. (An overflow may have occurred!)"));
-		return TFixedVector<DP>::ZeroVector;
+		return FFixedVector::ZeroVector;
 	}
 
-	if (SquareSum > TFixed<DP>::Zero)
-		*this /= TFixedVector<DP>(Length());
+	if (SquareSum > 0)
+		*this /= FFixedVector(Length());
 
 	return *this;
 }

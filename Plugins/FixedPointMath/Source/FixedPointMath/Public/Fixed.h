@@ -3,29 +3,30 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Fixed.generated.h"
 
-// 泛型定点数
-template<int64 DP>
-class FIXEDPOINTMATH_API TFixed
+USTRUCT(BlueprintType)
+struct FIXEDPOINTMATH_API FFixed
 {
-public:
-	static constexpr int64 DecimalPrecision = DP;
-	
-	static const TFixed Zero;
-	static const TFixed One;
-	static const TFixed Unit;
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fixed", SaveGame)
 	int64 Data;
 
-	FORCEINLINE TFixed() { };
-	explicit FORCEINLINE TFixed(int64 A, bool UseRaw = false) { Data = UseRaw ? A : A * DecimalPrecision; }
-	explicit FORCEINLINE operator int64() const { return Data / DecimalPrecision; }
+	static const FFixed Unit;
+	static const FFixed Pi;
 
-	FORCEINLINE TFixed(int32 A) { Data = A * DecimalPrecision; }
-	explicit FORCEINLINE operator int32() const { return Data / DecimalPrecision; }
+	static constexpr unsigned int DecimalBit = 12;
 
-#define BASIC_INT_TYPE_CAST(T) explicit FORCEINLINE TFixed(T A) : TFixed(static_cast<int64>(A)) { } \
-		explicit FORCEINLINE operator T() const { return static_cast<T>(Data / DecimalPrecision); }
+	FORCEINLINE FFixed() { };
+	FORCEINLINE FFixed(int64 A, bool UseRaw = false) { Data = UseRaw ? A : A << DecimalBit; }
+	explicit FORCEINLINE operator int64() const { return Data >> DecimalBit; }
+
+	FORCEINLINE FFixed(int32 A) { Data = A << DecimalBit; }
+	explicit FORCEINLINE operator int32() const { return Data >> DecimalBit; }
+
+#define BASIC_INT_TYPE_CAST(T) explicit FORCEINLINE FFixed(T A) : FFixed(static_cast<int64>(A)) { } \
+		explicit FORCEINLINE operator T() const { return static_cast<T>(Data >> DecimalBit); }
 
 	BASIC_INT_TYPE_CAST(int8)
 	BASIC_INT_TYPE_CAST(int16)
@@ -37,16 +38,16 @@ public:
 
 #undef BASIC_INT_TYPE_CAST
 
-	explicit TFixed(float A) { Data = A * DecimalPrecision + 0.5; }
-	explicit FORCEINLINE operator float() const { return static_cast<float>(Data) / DecimalPrecision; }
+	explicit FFixed(float A) { Data = A * (1 << DecimalBit) + 0.5; }
+	explicit FORCEINLINE operator float() const { return static_cast<float>(Data) / (1 << DecimalBit); }
 
-	explicit TFixed(double A) { Data = A * DecimalPrecision + 0.5; }
-	FORCEINLINE operator double() const { return static_cast<double>(Data) / DecimalPrecision; }
+	explicit FFixed(double A) { Data = A * (1 << DecimalBit) + 0.5; }
+	explicit FORCEINLINE operator double() const { return static_cast<double>(Data) / (1 << DecimalBit); }
 
-	explicit TFixed(long double A) { Data = A * DecimalPrecision + 0.5; }
-	explicit FORCEINLINE operator long double() const { return static_cast<long double>(Data) / DecimalPrecision; }
+	explicit FFixed(long double A) { Data = A * (1 << DecimalBit) + 0.5; }
+	explicit FORCEINLINE operator long double() const { return static_cast<long double>(Data) / (1 << DecimalBit); }
 
-#define FIXED_CMP_OP(O) FORCEINLINE bool operator O(const TFixed &RHS) const { return Data O RHS.Data; }
+#define FIXED_CMP_OP(O) FORCEINLINE bool operator O(const FFixed& RHS) const { return Data O RHS.Data; }
 
 	FIXED_CMP_OP(==)
 	FIXED_CMP_OP(!=)
@@ -58,13 +59,13 @@ public:
 #undef FIXED_CMP_OP
 
 	FORCEINLINE bool operator !() const { return !Data; }
-	FORCEINLINE TFixed operator ~() const { return TFixed(~Data); }
-	FORCEINLINE TFixed &operator ++() { Data += DecimalPrecision; return *this; }
-	FORCEINLINE TFixed &operator --() { Data += DecimalPrecision; return *this; }
-	FORCEINLINE TFixed operator -() const { TFixed Temp; Temp.Data = -Data; return Temp; }
+	FORCEINLINE FFixed operator ~() const { return FFixed(~Data); }
+	FORCEINLINE FFixed& operator ++() { Data += (1 << DecimalBit); return *this; }
+	FORCEINLINE FFixed& operator --() { Data += (1 << DecimalBit); return *this; }
+	FORCEINLINE FFixed operator -() const { FFixed Temp; Temp.Data = -Data; return Temp; }
 
-#define FIXED_DIR_OP(O) FORCEINLINE TFixed &operator O ##=(const TFixed &RHS) { Data O##= RHS.Data; return *this; } \
-        FORCEINLINE TFixed operator O(const TFixed &RHS) const { TFixed Temp(*this); Temp O##= RHS; return Temp; }
+#define FIXED_DIR_OP(O) FORCEINLINE FFixed& operator O ##=(const FFixed& RHS) { Data O##= RHS.Data; return *this; } \
+        FORCEINLINE FFixed operator O(const FFixed& RHS) const { FFixed Temp(*this); Temp O##= RHS; return Temp; }
 
 	FIXED_DIR_OP(+)
 	FIXED_DIR_OP(-)
@@ -74,37 +75,25 @@ public:
 
 #undef FIXED_DIR_OP
 
-	FORCEINLINE TFixed &operator *=(const TFixed &RHS) {
+	FORCEINLINE FFixed& operator *=(const FFixed& RHS) {
 		Data *= RHS.Data;
-		Data /= DecimalPrecision;
+		Data >>= DecimalBit;
 		return *this;
 	}
-	FORCEINLINE TFixed operator *(const TFixed &RHS) const { TFixed Temp(*this); Temp *= RHS; return Temp; }
+	FORCEINLINE FFixed operator *(const FFixed& RHS) const { FFixed Temp(*this); Temp *= RHS; return Temp; }
 
-	FORCEINLINE TFixed &operator /=(const TFixed &RHS) {
-		Data *= DecimalPrecision;
+	FORCEINLINE FFixed& operator /=(const FFixed& RHS) {
+		Data <<= DecimalBit;
 		Data /= RHS.Data;
 		return *this;
 	}
 
-	FORCEINLINE TFixed operator /(const TFixed &RHS) const { TFixed Temp(*this); Temp /= RHS; return Temp; }
+	FORCEINLINE FFixed operator /(const FFixed& RHS) const { FFixed Temp(*this); Temp /= RHS; return Temp; }
 
-	FORCEINLINE TFixed &operator >>=(uint64 RHS) { Data >>= RHS; return *this; }
-	FORCEINLINE TFixed operator >>(uint64 RHS) const { TFixed Temp(*this); Temp >>= RHS; return Temp; }
+	FORCEINLINE FFixed& operator >>=(uint64 RHS) { Data >>= RHS; return *this; }
+	FORCEINLINE FFixed operator >>(uint64 RHS) const { FFixed Temp(*this); Temp >>= RHS; return Temp; }
 
-	FORCEINLINE TFixed &operator <<=(uint64 RHS) { Data <<= RHS; return *this; }
-	FORCEINLINE TFixed operator <<(uint64 RHS) const { TFixed Temp(*this); Temp <<= RHS; return Temp; }
+	FORCEINLINE FFixed& operator <<=(uint64 RHS) { Data <<= RHS; return *this; }
+	FORCEINLINE FFixed operator <<(uint64 RHS) const { FFixed Temp(*this); Temp <<= RHS; return Temp; }
 
 };
-
-// 实例化一个精度为4096的定点数
-typedef TFixed<4096> FFixed;
-
-template<int64 DP>
-const TFixed<DP> TFixed<DP>::Zero = TFixed<DP>(0);
-
-template<int64 DP>
-const TFixed<DP> TFixed<DP>::One = TFixed<DP>(1);
-
-template<int64 DP>
-const TFixed<DP> TFixed<DP>::Unit = TFixed<DP>(1, true);

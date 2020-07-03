@@ -2,3 +2,6 @@
 
 
 #include "Fixed.h"
+
+const FFixed FFixed::Unit = { 1 };
+const FFixed FFixed::Pi = { 12868 };

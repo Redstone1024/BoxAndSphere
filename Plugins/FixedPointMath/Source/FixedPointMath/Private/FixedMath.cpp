@@ -123,9 +123,9 @@ namespace
 	};
 }
 
-TFixed<4096> FFixedMath::TanUnitRaw(TFixed<4096> A)
+FFixed FFixedMath::TanUnit(FFixed A)
 {
-	TFixed<4096> Result;
+	FFixed Result;
 	bool Signed = A.Data < 0;
 	A.Data = FMath::Abs(A.Data);
 	int64 Temp = A.Data % 2048;
@@ -138,16 +138,16 @@ TFixed<4096> FFixedMath::TanUnitRaw(TFixed<4096> A)
 	return Result;
 }
 
-TFixed<4096> FFixedMath::SinUnitRaw(TFixed<4096> A)
+FFixed FFixedMath::SinUnit(FFixed A)
 {
-	TFixed<4096> Quarter;
+	FFixed Quarter;
 	Quarter.Data = 1024;
 	return CosUnit(A - Quarter);
 }
 
-TFixed<4096> FFixedMath::CosUnitRaw(TFixed<4096> A)
+FFixed FFixedMath::CosUnit(FFixed A)
 {
-	TFixed<4096> Result;
+	FFixed Result;
 	A.Data = FMath::Abs(A.Data);
 	int64 Temp = A.Data % 2048;
 	bool Signed = A.Data % 4096 < 2048;

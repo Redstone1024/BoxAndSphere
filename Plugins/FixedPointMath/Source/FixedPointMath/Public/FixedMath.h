@@ -11,96 +11,46 @@ class FIXEDPOINTMATH_API FFixedMath
 {
 public:
 
-	// 精度转换
-
-	template<int64 DPR, int64 DPP>
-	static FORCEINLINE TFixed<DPR> PrecConv(TFixed<DPP> A);
-
 	// 常用数学
 
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Abs(TFixed<DP> A) { return FMath::Abs(A); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Min(TFixed<DP> A, TFixed<DP> B) { return FMath::Min(A, B); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Max(TFixed<DP> A, TFixed<DP> B) { return FMath::Max(A, B); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Clamp(TFixed<DP> Value, TFixed<DP> Min, TFixed<DP> Max) { return FMath::Clamp(Value, Min, Max); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Sqrt(TFixed<DP> A);
+	static FORCEINLINE FFixed Abs(FFixed A) { return FMath::Abs(A); }
+	static FORCEINLINE FFixed Min(FFixed A, FFixed B) { return FMath::Min(A, B); }
+	static FORCEINLINE FFixed Max(FFixed A, FFixed B) { return FMath::Max(A, B); }
+	static FORCEINLINE FFixed Clamp(FFixed Value, FFixed Min, FFixed Max) { return FMath::Clamp(Value, Min, Max); }
+	static FORCEINLINE FFixed Sqrt(FFixed A);
 
 	// 三角函数
 
-	static TFixed<4096> TanUnitRaw(TFixed<4096> A);
-
-	static TFixed<4096> SinUnitRaw(TFixed<4096> A);
-
-	static TFixed<4096> CosUnitRaw(TFixed<4096> A);
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> TanDeg(TFixed<DP> A) { return TanUnit<DP>(A / TFixed<DP>(360)); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> SinDeg(TFixed<DP> A) { return SinUnit<DP>(A / TFixed<DP>(360)); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> CosDeg(TFixed<DP> A) { return CosUnit<DP>(A / TFixed<DP>(360)); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Tan(TFixed<DP> A) { return TanUnit<DP>(A / (TFixed<DP>(2) * PrecConv<DP>(GetPI<DP>()))); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Sin(TFixed<DP> A) { return SinUnit<DP>(A / (TFixed<DP>(2) * PrecConv<DP>(GetPI<DP>()))); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> Cos(TFixed<DP> A) { return CosUnit<DP>(A / (TFixed<DP>(2) * PrecConv<DP>(GetPI<DP>()))); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> GetPI() { TFixed<268435456> Temp; Temp.Data = 843314857; return FFixedMath::PrecConv<DP>(Temp); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> TanUnit(TFixed<DP> A) { return FFixedMath::PrecConv<DP>(FFixedMath::TanUnitRaw(FFixedMath::PrecConv<4096>(A))); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> SinUnit(TFixed<DP> A) { return FFixedMath::PrecConv<DP>(FFixedMath::SinUnitRaw(FFixedMath::PrecConv<4096>(A))); }
-
-	template<int64 DP>
-	static FORCEINLINE TFixed<DP> CosUnit(TFixed<DP> A) { return FFixedMath::PrecConv<DP>(FFixedMath::CosUnitRaw(FFixedMath::PrecConv<4096>(A))); }
+	static FFixed TanUnit(FFixed A);
+	static FFixed SinUnit(FFixed A);
+	static FFixed CosUnit(FFixed A);
+	static FORCEINLINE FFixed TanDeg(FFixed A) { return TanUnit(A / FFixed(360)); }
+	static FORCEINLINE FFixed SinDeg(FFixed A) { return SinUnit(A / FFixed(360)); }
+	static FORCEINLINE FFixed CosDeg(FFixed A) { return CosUnit(A / FFixed(360)); }
+	static FORCEINLINE FFixed Tan(FFixed A) { return TanUnit(A / (FFixed(2) * FFixed::Pi)); }
+	static FORCEINLINE FFixed Sin(FFixed A) { return SinUnit(A / (FFixed(2) * FFixed::Pi)); }
+	static FORCEINLINE FFixed Cos(FFixed A) { return CosUnit(A / (FFixed(2) * FFixed::Pi)); }
 
 };
 
-template<int64 DPR, int64 DPP>
-FORCEINLINE TFixed<DPR> FFixedMath::PrecConv(TFixed<DPP> A)
+FORCEINLINE FFixed FFixedMath::Sqrt(FFixed A)
 {
-	TFixed<DPR> Temp;
-	Temp = static_cast<TFixed<DPR>>(A.Data);
-	Temp.Data /= TFixed<DPP>::DecimalPrecision;
-	return Temp;
-}
-
-template<int64 DP>
-FORCEINLINE TFixed<DP> FFixedMath::Sqrt(TFixed<DP> A)
-{
-	if (A < TFixed<DP>::Zero)
+	if (A < 0)
 	{
 		UE_LOG(LogFixedPointMath, Warning, TEXT("The square root cannot be negative. (An overflow may have occurred!)"));
-		return TFixed<DP>(0);
+		return 0;
 	}
 
 	// TODO: 将此处的二分求解换成更快的算法
 
-	TFixed<DP> Temp;
+	FFixed Temp;
 
-	if (A == TFixed<DP>::Zero) return TFixed<DP>::Zero;
+	if (A == 0) return 0;
 	else
 	{
 		uint64 t;
 		uint64 q = 0;
-		uint64 r = A;
+		uint64 r = (uint64)A;
 		uint64 b = 0x4000000000000000;
 		while (b > 0)
 		{
@@ -113,16 +63,16 @@ FORCEINLINE TFixed<DP> FFixedMath::Sqrt(TFixed<DP> A)
 			}
 			b >>= 2;
 		}
-		Temp = TFixed<DP>(q);
+		Temp = FFixed(q);
 
-		TFixed<DP> L = Temp;
-		TFixed<DP> R = Temp + TFixed<DP>::One;
-		TFixed<DP> M = (L + R) / TFixed<DP>(2);
+		FFixed L = Temp;
+		FFixed R = Temp + 1;
+		FFixed M = (L + R) >> 1;
 		while (L < R)
 		{
-			if (M * M < A) L = M + TFixed<DP>::Unit;
-			else R = M - TFixed<DP>::Unit;
-			M = (L + R) / TFixed<DP>(2);
+			if (M * M < A) L = M + FFixed::Unit;
+			else R = M - FFixed::Unit;
+			M = (L + R) >> 1;
 		}
 		Temp = L;
 	}
