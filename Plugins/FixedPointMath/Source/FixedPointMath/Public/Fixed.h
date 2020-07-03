@@ -22,8 +22,8 @@ struct FIXEDPOINTMATH_API FFixed
 	FORCEINLINE FFixed(int64 A, bool UseRaw = false) { Data = UseRaw ? A : A << DecimalBit; }
 	explicit FORCEINLINE operator int64() const { return Data >> DecimalBit; }
 
-	FORCEINLINE FFixed(int32 A) { Data = A << DecimalBit; }
-	explicit FORCEINLINE operator int32() const { return Data >> DecimalBit; }
+	FORCEINLINE FFixed(int32 A) : FFixed(static_cast<int64>(A)) { }
+	explicit FORCEINLINE operator int32() const { return static_cast<int32>(Data >> DecimalBit); }
 
 #define BASIC_INT_TYPE_CAST(T) explicit FORCEINLINE FFixed(T A) : FFixed(static_cast<int64>(A)) { } \
 		explicit FORCEINLINE operator T() const { return static_cast<T>(Data >> DecimalBit); }
