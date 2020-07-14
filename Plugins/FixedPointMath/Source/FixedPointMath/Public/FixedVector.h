@@ -39,12 +39,12 @@ struct FIXEDPOINTMATH_API FFixedVector
 	explicit FORCEINLINE FFixedVector(const FIntVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
 	explicit FORCEINLINE operator FIntVector() const { return FIntVector(static_cast<int32>(X), static_cast<int32>(Y), static_cast<int32>(Z)); }
 
-	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& RHS) { *this = *this ^ RHS; return *this; }
-	FORCEINLINE FFixedVector operator ^(const FFixedVector& RHS) const { return FFixedVector(Y * RHS.Z - Z * RHS.Y, Z * RHS.X - X * RHS.Z, X * RHS.Y - Y * RHS.X); }
-	FORCEINLINE FFixed operator |(const FFixedVector& RHS) const { return X * RHS.X + Y * RHS.Y + Z * RHS.Z; }
+	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& V) { *this = *this ^ V; return *this; }
+	FORCEINLINE FFixedVector operator ^(const FFixedVector& V) const { return FFixedVector(Y * V.Z - Z * V.Y, Z * V.X - X * V.Z, X * V.Y - Y * V.X); }
+	FORCEINLINE FFixed operator |(const FFixedVector& V) const { return X * V.X + Y * V.Y + Z * V.Z; }
 
-#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector &RHS) { X O##= RHS.X; Y O##= RHS.Y; Z O##= RHS.Z; return *this; } \
-        FORCEINLINE FFixedVector operator O(const FFixedVector &RHS) const { FFixedVector Temp(*this); Temp O##= RHS; return Temp; }
+#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector& V) { X O##= V.X; Y O##= V.Y; Z O##= V.Z; return *this; } \
+        FORCEINLINE FFixedVector operator O(const FFixedVector& V) const { FFixedVector Temp(*this); Temp O##= V; return Temp; }
 
 	FIXED_BIN_OP(+)
 	FIXED_BIN_OP(-)
@@ -54,8 +54,8 @@ struct FIXEDPOINTMATH_API FFixedVector
 #undef FIXED_BIN_OP
 
 	FORCEINLINE FFixedVector operator -() const { return FFixedVector(-X, -Y, -Z); }
-	FORCEINLINE bool operator ==(const FFixedVector& RHS) const { return (X == RHS.X) && (Y == RHS.Y) && (Z == RHS.Z); }
-	FORCEINLINE bool operator !=(const FFixedVector& RHS) const { return (X != RHS.X) || (Y != RHS.Y) || (Z != RHS.Z); }
+	FORCEINLINE bool operator ==(const FFixedVector& V) const { return (X == V.X) && (Y == V.Y) && (Z == V.Z); }
+	FORCEINLINE bool operator !=(const FFixedVector& V) const { return (X != V.X) || (Y != V.Y) || (Z != V.Z); }
 
 	FORCEINLINE bool IsZero() const { return X == 0 && Y == 0 && Z == 0; }
 	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(LengthSquared()); }
