@@ -61,13 +61,13 @@ struct FIXEDPOINTMATH_API FFixedVector
 	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(LengthSquared()); }
 	FORCEINLINE FFixed LengthSquared() const { return X * X + Y * Y + Z * Z; }
 	FORCEINLINE FFixedVector Normalize();
-
 };
 
 namespace FFixedMath
 {
 	// 常用数学
 
+//	FORCEINLINE FFixedVector LerpVector(FFixedVector A, FFixedVector B, FFixed Alpha) { return FMath::Lerp(A, B, Alpha); }
 	FORCEINLINE FFixedVector ComponentAbs(const FFixedVector& A) { return FFixedVector(FFixedMath::Abs(A.X), FFixedMath::Abs(A.Y), FFixedMath::Abs(A.Z)); }
 	FORCEINLINE FFixedVector ComponentMin(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(FFixedMath::Min(A.X, B.X), FFixedMath::Min(A.Y, B.Y), FFixedMath::Min(A.Z, B.Z)); }
 	FORCEINLINE FFixedVector ComponentMax(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(FFixedMath::Max(A.X, B.X), FFixedMath::Max(A.Y, B.Y), FFixedMath::Max(A.Z, B.Z)); }

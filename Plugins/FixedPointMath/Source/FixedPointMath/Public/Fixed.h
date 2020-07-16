@@ -90,6 +90,12 @@ struct FIXEDPOINTMATH_API FFixed
 	}
 	FORCEINLINE FFixed operator /(const FFixed& F) const { FFixed Temp(*this); Temp /= F; return Temp; }
 
+	FORCEINLINE FFixed& operator %=(const FFixed& F) {
+		Data %= F.Data;
+		return *this;
+	}
+	FORCEINLINE FFixed operator %(const FFixed& F) const { FFixed Temp(*this); Temp %= F; return Temp; }
+
 	FORCEINLINE FFixed& operator >>=(uint64 F) { Data >>= F; return *this; }
 	FORCEINLINE FFixed operator >>(uint64 F) const { FFixed Temp(*this); Temp >>= F; return Temp; }
 	FORCEINLINE FFixed& operator <<=(uint64 F) { Data <<= F; return *this; }
@@ -103,6 +109,7 @@ namespace FFixedMath
 	FORCEINLINE FFixed Abs(FFixed A) { return FMath::Abs(A); }
 	FORCEINLINE FFixed Min(FFixed A, FFixed B) { return FMath::Min(A, B); }
 	FORCEINLINE FFixed Max(FFixed A, FFixed B) { return FMath::Max(A, B); }
+	FORCEINLINE FFixed Lerp(FFixed A, FFixed B, FFixed Alpha) { return FMath::Lerp(A, B, Alpha); }
 	FORCEINLINE FFixed Clamp(FFixed Value, FFixed Min, FFixed Max) { return FMath::Clamp(Value, Min, Max); }
 	FORCEINLINE FFixed Sqrt(FFixed A);
 
