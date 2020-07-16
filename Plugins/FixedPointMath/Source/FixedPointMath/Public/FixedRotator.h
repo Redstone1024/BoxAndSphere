@@ -31,14 +31,14 @@ struct FIXEDPOINTMATH_API FFixedRotator
 	explicit FORCEINLINE FFixedRotator(const FRotator& InRotator) : Pitch(InRotator.Pitch), Yaw(InRotator.Yaw), Roll(InRotator.Roll) { }
 	explicit FORCEINLINE operator FRotator() const { return FRotator(static_cast<float>(Pitch), static_cast<float>(Yaw), static_cast<float>(Roll)); }
 
-	FFixedRotator &operator +=(const FFixedRotator& R) { Pitch += R.Pitch; Yaw += R.Yaw; Roll += R.Roll; return *this; }
-	FORCEINLINE FFixedRotator operator +(const FFixedRotator& R) const { FFixedRotator Temp(*this); Temp += R; return Temp; }
-	FFixedRotator &operator -=(const FFixedRotator& R) { Pitch -= R.Pitch; Yaw -= R.Yaw; Roll -= R.Roll; return *this; }
-	FORCEINLINE FFixedRotator operator -(const FFixedRotator& R) const { FFixedRotator Temp(*this); Temp -= R; return Temp; }
-	FFixedRotator &operator *=(const FFixed& Scale) { Pitch *= Scale; Yaw *= Scale; Roll *= Scale; return *this; }
-	FORCEINLINE FFixedRotator operator *(const FFixed& Scale) const { FFixedRotator Temp(*this); Temp *= Scale; return Temp; }
-	FFixedRotator &operator /=(const FFixed& Scale) { Pitch /= Scale; Yaw /= Scale; Roll /= Scale; return *this; }
-	FORCEINLINE FFixedRotator operator /(const FFixed& Scale) const { FFixedRotator Temp(*this); Temp /= Scale; return Temp; }
+	FORCEINLINE FFixedRotator &operator +=(const FFixedRotator& R) { Pitch += R.Pitch; Yaw += R.Yaw; Roll += R.Roll; return *this; }
+	friend FORCEINLINE FFixedRotator operator +(FFixedRotator A, FFixedRotator B) { A += B; return A; }
+	FORCEINLINE FFixedRotator &operator -=(const FFixedRotator& R) { Pitch -= R.Pitch; Yaw -= R.Yaw; Roll -= R.Roll; return *this; }
+	friend FORCEINLINE FFixedRotator operator -(FFixedRotator A, FFixedRotator B) { A -= B; return A; }
+	FORCEINLINE FFixedRotator &operator *=(const FFixed Scale) { Pitch *= Scale; Yaw *= Scale; Roll *= Scale; return *this; }
+	FORCEINLINE FFixedRotator operator *(const FFixed Scale) const { FFixedRotator Temp(*this); Temp *= Scale; return Temp; }
+	FORCEINLINE FFixedRotator &operator /=(const FFixed Scale) { Pitch /= Scale; Yaw /= Scale; Roll /= Scale; return *this; }
+	FORCEINLINE FFixedRotator operator /(const FFixed Scale) const { FFixedRotator Temp(*this); Temp /= Scale; return Temp; }
 
 	FORCEINLINE FFixedRotator operator -() const { return FFixedRotator(-Pitch, -Yaw, -Roll); }
 	FORCEINLINE bool operator ==(const FFixedRotator& R) const { return (Pitch == R.Pitch) && (Yaw == R.Yaw) && (Roll == R.Roll); }
@@ -51,7 +51,7 @@ namespace FFixedMath
 {
 	FORCEINLINE FFixed ClampAxis(FFixed Angle);
 	FORCEINLINE FFixedRotator ClampRotator(FFixedRotator R) { return FFixedRotator(ClampAxis(R.Pitch), ClampAxis(R.Yaw), ClampAxis(R.Roll)); }
-//	FORCEINLINE FFixedRotator LerpRotator(FFixedRotator A, FFixedRotator B, FFixed Alpha) { return FMath::Lerp(A, B, Alpha); }
+	FORCEINLINE FFixedRotator LerpRotator(FFixedRotator A, FFixedRotator B, FFixed Alpha) { return A + (B - A) * Alpha; }
 }
 
 FORCEINLINE FFixed FFixedMath::ClampAxis(FFixed Angle)

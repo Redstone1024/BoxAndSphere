@@ -48,7 +48,7 @@ struct FIXEDPOINTMATH_API FFixed
 	explicit FFixed(long double A) { Data = A * (1 << DecimalBit) + 0.5; }
 	explicit FORCEINLINE operator long double() const { return static_cast<long double>(Data) / (1 << DecimalBit); }
 
-#define FIXED_CMP_OP(O) FORCEINLINE bool operator O(const FFixed& F) const { return Data O F.Data; }
+#define FIXED_CMP_OP(O) friend FORCEINLINE bool operator O(const FFixed A, const FFixed B) { return A.Data O B.Data; }
 
 	FIXED_CMP_OP(==)
 	FIXED_CMP_OP(!=)
@@ -65,8 +65,8 @@ struct FIXEDPOINTMATH_API FFixed
 	FORCEINLINE FFixed& operator --() { Data += (1 << DecimalBit); return *this; }
 	FORCEINLINE FFixed operator -() const { FFixed Temp; Temp.Data = -Data; return Temp; }
 
-#define FIXED_DIR_OP(O) FORCEINLINE FFixed& operator O ##=(const FFixed& F) { Data O##= F.Data; return *this; } \
-        FORCEINLINE FFixed operator O(const FFixed& F) const { FFixed Temp(*this); Temp O##= F; return Temp; }
+#define FIXED_NAS_OP(O) friend FORCEINLINE FFixed operator O(FFixed A, FFixed B) { A O##= B; return A; }
+#define FIXED_DIR_OP(O) FORCEINLINE FFixed& operator O ##=(const FFixed F) { Data O##= F.Data; return *this; } FIXED_NAS_OP(O)
 
 	FIXED_DIR_OP(+)
 	FIXED_DIR_OP(-)
@@ -81,20 +81,23 @@ struct FIXEDPOINTMATH_API FFixed
 		Data >>= DecimalBit;
 		return *this;
 	}
-	FORCEINLINE FFixed operator *(const FFixed& F) const { FFixed Temp(*this); Temp *= F; return Temp; }
 
 	FORCEINLINE FFixed& operator /=(const FFixed& F) {
 		Data <<= DecimalBit;
 		Data /= F.Data;
 		return *this;
 	}
-	FORCEINLINE FFixed operator /(const FFixed& F) const { FFixed Temp(*this); Temp /= F; return Temp; }
 
 	FORCEINLINE FFixed& operator %=(const FFixed& F) {
 		Data %= F.Data;
 		return *this;
 	}
-	FORCEINLINE FFixed operator %(const FFixed& F) const { FFixed Temp(*this); Temp %= F; return Temp; }
+
+	FIXED_NAS_OP(*)
+	FIXED_NAS_OP(/)
+	FIXED_NAS_OP(%)
+
+#undef FIXED_NAS_OP
 
 	FORCEINLINE FFixed& operator >>=(uint64 F) { Data >>= F; return *this; }
 	FORCEINLINE FFixed operator >>(uint64 F) const { FFixed Temp(*this); Temp >>= F; return Temp; }

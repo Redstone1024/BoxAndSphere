@@ -32,7 +32,7 @@ struct FIXEDPOINTMATH_API FFixedVector
 	static const FFixedVector LeftVector;
 
 	FORCEINLINE FFixedVector() { }
-	explicit FORCEINLINE FFixedVector(FFixed InF) : X(InF), Y(InF), Z(InF) { }
+	FORCEINLINE FFixedVector(FFixed InF) : X(InF), Y(InF), Z(InF) { }
 	FORCEINLINE FFixedVector(FFixed InX, FFixed InY, FFixed InZ) : X(InX), Y(InY), Z(InZ) { }
 	explicit FORCEINLINE FFixedVector(const FVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
 	explicit FORCEINLINE operator FVector() const { return FVector(static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z)); }
@@ -43,8 +43,8 @@ struct FIXEDPOINTMATH_API FFixedVector
 	FORCEINLINE FFixedVector operator ^(const FFixedVector& V) const { return FFixedVector(Y * V.Z - Z * V.Y, Z * V.X - X * V.Z, X * V.Y - Y * V.X); }
 	FORCEINLINE FFixed operator |(const FFixedVector& V) const { return X * V.X + Y * V.Y + Z * V.Z; }
 
-#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector& V) { X O##= V.X; Y O##= V.Y; Z O##= V.Z; return *this; } \
-        FORCEINLINE FFixedVector operator O(const FFixedVector& V) const { FFixedVector Temp(*this); Temp O##= V; return Temp; }
+#define FIXED_NAS_OP(O) friend FORCEINLINE FFixedVector operator O(FFixedVector A, FFixedVector B) { A O##= B; return A; }
+#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector& V) { X O##= V.X; Y O##= V.Y; Z O##= V.Z; return *this; } FIXED_NAS_OP(O)
 
 	FIXED_BIN_OP(+)
 	FIXED_BIN_OP(-)
@@ -52,6 +52,7 @@ struct FIXEDPOINTMATH_API FFixedVector
 	FIXED_BIN_OP(/)
 
 #undef FIXED_BIN_OP
+#undef FIXED_NAS_OP
 
 	FORCEINLINE FFixedVector operator -() const { return FFixedVector(-X, -Y, -Z); }
 	FORCEINLINE bool operator ==(const FFixedVector& V) const { return (X == V.X) && (Y == V.Y) && (Z == V.Z); }
@@ -67,7 +68,7 @@ namespace FFixedMath
 {
 	// 常用数学
 
-//	FORCEINLINE FFixedVector LerpVector(FFixedVector A, FFixedVector B, FFixed Alpha) { return FMath::Lerp(A, B, Alpha); }
+	FORCEINLINE FFixedVector LerpVector(FFixedVector A, FFixedVector B, FFixed Alpha) { return FMath::Lerp(A, B, Alpha); }
 	FORCEINLINE FFixedVector ComponentAbs(const FFixedVector& A) { return FFixedVector(FFixedMath::Abs(A.X), FFixedMath::Abs(A.Y), FFixedMath::Abs(A.Z)); }
 	FORCEINLINE FFixedVector ComponentMin(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(FFixedMath::Min(A.X, B.X), FFixedMath::Min(A.Y, B.Y), FFixedMath::Min(A.Z, B.Z)); }
 	FORCEINLINE FFixedVector ComponentMax(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(FFixedMath::Max(A.X, B.X), FFixedMath::Max(A.Y, B.Y), FFixedMath::Max(A.Z, B.Z)); }
