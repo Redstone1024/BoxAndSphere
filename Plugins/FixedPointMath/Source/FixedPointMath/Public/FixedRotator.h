@@ -50,7 +50,9 @@ struct FIXEDPOINTMATH_API FFixedRotator
 namespace FFixedMath
 {
 	FORCEINLINE FFixed ClampAxis(FFixed Angle);
+	FORCEINLINE FFixed NormalizeAxis(FFixed Angle);
 	FORCEINLINE FFixedRotator ClampRotator(FFixedRotator R) { return FFixedRotator(ClampAxis(R.Pitch), ClampAxis(R.Yaw), ClampAxis(R.Roll)); }
+	FORCEINLINE FFixedRotator NormalizeRotator(FFixedRotator R) { return FFixedRotator(NormalizeAxis(R.Pitch), NormalizeAxis(R.Yaw), NormalizeAxis(R.Roll)); }
 	FORCEINLINE FFixedRotator LerpRotator(FFixedRotator A, FFixedRotator B, FFixed Alpha) { return A + (B - A) * Alpha; }
 }
 
@@ -58,5 +60,13 @@ FORCEINLINE FFixed FFixedMath::ClampAxis(FFixed Angle)
 {
 	Angle = Angle % 360;
 	if (Angle < 0) Angle += 360;
+	return Angle;
+}
+
+FFixed FFixedMath::NormalizeAxis(FFixed Angle)
+{
+	Angle = ClampAxis(Angle);
+	if (Angle > 180)
+		Angle -= 360;
 	return Angle;
 }
