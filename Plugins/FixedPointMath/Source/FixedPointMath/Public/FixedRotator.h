@@ -9,7 +9,7 @@
 #include "FixedPointMath.h"
 #include "FixedRotator.generated.h"
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (HasNativeMake = "FixedPointMath.BlueprintFixedMath.MakeFixedRotator", HasNativeBreak = "FixedPointMath.BlueprintFixedMath.BreakFixedRotator"))
 struct FIXEDPOINTMATH_API FFixedRotator
 {
 	GENERATED_BODY()

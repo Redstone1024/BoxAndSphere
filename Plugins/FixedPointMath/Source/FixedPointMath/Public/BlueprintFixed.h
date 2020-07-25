@@ -6,6 +6,7 @@
 #include "Fixed.h"
 #include "FixedVector.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "FixedRotator.h"
 #include "BlueprintFixed.generated.h"
 
 UCLASS(meta = (BlueprintThreadSafe, ScriptName = "FixedMathLibrary"))
@@ -195,4 +196,49 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Normalize (FixedVector)", ScriptMethod = "Normalize", Keywords = "Unit Vector"), Category = "Math|FixedVector")
 	static FORCEINLINE FFixedVector Normalize_FixedVector(const FFixedVector& A) { return FFixedMath::Normalize(A); }
+
+	// 旋转：
+	// Make/Break
+
+	UFUNCTION(BlueprintPure, Category = "Math|FixedRotator", meta = (Keywords = "construct build rotation rotate rotator makerotator", NativeMakeFunc))
+	static FFixedRotator MakeFixedRotator(UPARAM(DisplayName = "X (Roll)") FFixed Roll, UPARAM(DisplayName = "Y (Pitch)") FFixed Pitch, UPARAM(DisplayName = "Z (Yaw)") FFixed Yaw) { return FFixedRotator(Pitch, Yaw, Roll); }
+
+	UFUNCTION(BlueprintPure, Category = "Math|FixedRotator", meta = (Keywords = "rotation rotate rotator breakrotator", NativeBreakFunc))
+	static void BreakFixedRotator(UPARAM(DisplayName = "Rotation") const FFixedRotator& InRot, UPARAM(DisplayName = "X (Roll)") FFixed& Roll, UPARAM(DisplayName = "Y (Pitch)") FFixed& Pitch, UPARAM(DisplayName = "Z (Yaw)") FFixed& Yaw) { Roll = InRot.Roll; Pitch = InRot.Pitch; Yaw = InRot.Yaw; }
+
+	// 类型转换
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "ToFixedRotator (Rotator)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast), Category = "Math|Conversions")
+	static FORCEINLINE FFixedRotator Conv_RotatorToFixedRotator(const FRotator& InRotator) { return static_cast<FFixedRotator>(InRotator); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "ToRotator (FixedRotator)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast), Category = "Math|Conversions")
+	static FORCEINLINE FRotator Conv_FixedRotatorToRotator(const FFixedRotator& InRotator) { return FRotator(InRotator); }
+
+	// 布尔运算
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (FixedRotator)", CompactNodeTitle = "==", ScriptMethod = "IsNearEqual", ScriptOperator = "==", Keywords = "== equal"), Category = "Math|FixedRotator")
+	static FORCEINLINE bool EqualEqual_FixedRotatorFixedRotator(const FFixedRotator& A, const FFixedRotator& B) { return A == B; }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Not Equal (FixedRotator)", CompactNodeTitle = "!=", ScriptMethod = "IsNotNearEqual", ScriptOperator = "!=", Keywords = "!= not equal"), Category = "Math|FixedRotator")
+	static FORCEINLINE bool NotEqual_FixedRotatorFixedRotator(const FFixedRotator& A, const FFixedRotator& B) { return A != B; }
+
+	// 旋转运算
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Normalize (FixedRotator)", ScriptMethod = "Normalize", Keywords = "Unit Rotator"), Category = "Math|FixedRotator")
+	static FORCEINLINE FFixedRotator Normalize_FixedRotator(const FFixedRotator& A) { return FFixedMath::NormalizeRotator(A); }
+
+//	UFUNCTION(BlueprintPure, meta = (DisplayName = "CombineFixedRotators", ScriptMethod = "Combine", Keywords = "rotate rotation add"), Category = "Math|FixedRotator")
+//	static FORCEINLINE FFixedRotator CombineFixedRotators(const FFixedRotator& A, const FFixedRotator& B);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Delta (FixedRotator)", ScriptMethod = "Delta"), Category = "Math|FixedRotator")
+	static FORCEINLINE FFixedRotator NormalizedDeltaFixedRotator(const FFixedRotator& A, const FFixedRotator& B) { return FFixedMath::NormalizeRotator(A - B); }
+
+//	UFUNCTION(BlueprintPure, meta = (DisplayName = "InvertFixedRotator", ScriptMethod = "Inversed", ScriptOperator = "neg", Keywords = "rotate rotation"), Category = "Math|FixedRotator")
+//	static FORCEINLINE FFixedRotator NegateFixedRotator(const FFixedRotator& A);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "ScaleFixedRotator", CompactNodeTitle = "*", ScriptMethod = "Scale", Keywords = "* multiply rotate rotation"), Category = "Math|FixedRotator")
+	static FORCEINLINE FFixedRotator Multiply_FixedRotatorFixed(const FFixedRotator& A, FFixed B) { return A * B; }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Lerp (FixedRotator)", ScriptMethod = "Lerp"), Category = "Math|FixedRotator")
+	static FORCEINLINE FFixedRotator Lerp_FixedRotator(const FFixedRotator& A, const FFixedRotator& B, FFixed Alpha) { return FFixedMath::LerpRotator(A, B, Alpha); }
 };
