@@ -58,10 +58,13 @@ struct FIXEDPOINTMATH_API FFixedVector
 	FORCEINLINE bool operator ==(const FFixedVector& V) const { return (X == V.X) && (Y == V.Y) && (Z == V.Z); }
 	FORCEINLINE bool operator !=(const FFixedVector& V) const { return (X != V.X) || (Y != V.Y) || (Z != V.Z); }
 
+	FORCEINLINE FFixed& operator [](int32 Index) { check(Index >= 0 && Index < 3); return (&X)[Index]; }
+	FORCEINLINE FFixed operator [](int32 Index) const { check(Index >= 0 && Index < 3); return (&X)[Index]; }
+
 	FORCEINLINE bool IsZero() const { return X == 0 && Y == 0 && Z == 0; }
 	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(LengthSquared()); }
 	FORCEINLINE FFixed LengthSquared() const { return X * X + Y * Y + Z * Z; }
-	FORCEINLINE FFixedVector Normalize();
+	FORCEINLINE bool Normalize();
 };
 
 namespace FFixedMath
@@ -77,21 +80,24 @@ namespace FFixedMath
 
 	FORCEINLINE FFixedVector CrossProduct(const FFixedVector& A, const FFixedVector& B) { return A ^ B; }
 	FORCEINLINE FFixed DotProduct(const FFixedVector& A, const FFixedVector& B) { return A | B; }
-	FORCEINLINE FFixedVector Normalize(const FFixedVector& A) { FFixedVector Result = A; return Result.Normalize(); }
+	FORCEINLINE FFixedVector Normalize(const FFixedVector& A) { FFixedVector Result = A; Result.Normalize(); return Result; }
 }
 
-FORCEINLINE FFixedVector FFixedVector::Normalize()
+FORCEINLINE bool FFixedVector::Normalize()
 {
 	FFixed SquareSum = LengthSquared();
 
 	if (SquareSum < 0)
 	{
 		UE_LOG(LogFixedPointMath, Warning, TEXT("Vector length is too long. (An overflow may have occurred!)"));
-		return FFixedVector::ZeroVector;
+		return false;
 	}
 
-	if (SquareSum > 0)
-		*this /= FFixedVector(FFixedMath::Sqrt(SquareSum));
+	FFixed Length = FFixedMath::Sqrt(SquareSum);
+	if (Length > 0) {
+		*this /= Length;
+		return true;
+	}
 
-	return *this;
+	return false;
 }
