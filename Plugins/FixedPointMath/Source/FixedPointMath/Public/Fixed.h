@@ -48,6 +48,8 @@ struct FIXEDPOINTMATH_API FFixed
 	explicit FFixed(long double A) { Data = A * (1 << DecimalBit) + 0.5; }
 	explicit FORCEINLINE operator long double() const { return static_cast<long double>(Data) / (1 << DecimalBit); }
 
+	static FFixed FromBit(int64 A) { FFixed Temp; Temp.Data = A; return Temp; }
+
 #define FIXED_CMP_OP(O) friend FORCEINLINE bool operator O(const FFixed A, const FFixed B) { return A.Data O B.Data; }
 
 	FIXED_CMP_OP(==)
@@ -139,38 +141,17 @@ FORCEINLINE FFixed FFixedMath::Sqrt(FFixed A)
 
 	// TODO: 将此处的二分求解换成更快的算法
 
-	FFixed Temp;
+	static const FFixed DefaultL = 0;
+	static const FFixed DefaultR = (int64)UINT32_MAX >> FFixed::DecimalBit;
 
-	if (A == 0) return 0;
-	else
-	{
-		uint64 t;
-		uint64 q = 0;
-		uint64 r = (uint64)A;
-		uint64 b = 0x4000000000000000;
-		while (b > 0)
-		{
-			t = q + b;
-			q >>= 1;
-			if (r >= t)
-			{
-				r -= t;
-				q += b;
-			}
-			b >>= 2;
-		}
-		Temp = FFixed(q);
-
-		FFixed L = Temp;
-		FFixed R = Temp + 1;
-		FFixed M = (L + R) >> 1;
-		while (L < R)
-		{
-			if (M * M < A) L = M + FFixed::Unit;
-			else R = M - FFixed::Unit;
-			M = (L + R) >> 1;
-		}
-		Temp = L;
+	FFixed Temp = 0;
+	FFixed L = DefaultL;
+	FFixed R = DefaultR;
+	FFixed M = L + ((R - L) >> 1);
+	while (L < R) {
+		if (M * M <= A) L = M + FFixed::Unit, Temp = M;
+		else R = M - FFixed::Unit;
+		M = L + ((R - L) >> 1);
 	}
 
 	return Temp;

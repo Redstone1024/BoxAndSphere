@@ -3,8 +3,8 @@
 
 #include "Fixed.h"
 
-const FFixed FFixed::Unit = { 1 };
-const FFixed FFixed::Pi = { 12868 };
+const FFixed FFixed::Unit = FFixed::FromBit(1);
+const FFixed FFixed::Pi = FFixed::FromBit(12868);
 
 namespace
 {

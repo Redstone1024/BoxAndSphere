@@ -88,7 +88,7 @@ public:
 	static FORCEINLINE bool InRange_Fixed(FFixed Value, FFixed Min, FFixed Max, bool InclusiveMin = true, bool InclusiveMax = true)
 	{ return ((InclusiveMin ? (Value >= Min) : (Value > Min)) && (InclusiveMax ? (Value <= Max) : (Value < Max))); }
 
-	UFUNCTION(BlueprintPure, Category = "Math|Fixed", meta = (Keywords = "square root", CompactNodeTitle = "SQRT"))
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "Sqrt (fixed)", Keywords = "square root", CompactNodeTitle = "SQRT"), Category = "Math|Fixed")
 	static FFixed Sqrt_Fixed(FFixed A);
 
 	// Èý½Çº¯Êý
