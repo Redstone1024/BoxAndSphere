@@ -39,32 +39,33 @@ struct FIXEDPOINTMATH_API FFixedVector
 	explicit FORCEINLINE FFixedVector(const FIntVector& InVector) : X(InVector.X), Y(InVector.Y), Z(InVector.Z) { }
 	explicit FORCEINLINE operator FIntVector() const { return FIntVector(static_cast<int32>(X), static_cast<int32>(Y), static_cast<int32>(Z)); }
 
-	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& V) { *this = *this ^ V; return *this; }
-	FORCEINLINE FFixedVector operator ^(const FFixedVector& V) const { return FFixedVector(Y * V.Z - Z * V.Y, Z * V.X - X * V.Z, X * V.Y - Y * V.X); }
-	FORCEINLINE FFixed operator |(const FFixedVector& V) const { return X * V.X + Y * V.Y + Z * V.Z; }
-
-#define FIXED_NAS_OP(O) friend FORCEINLINE FFixedVector operator O(FFixedVector A, FFixedVector B) { A O##= B; return A; }
-#define FIXED_BIN_OP(O) FORCEINLINE FFixedVector &operator O ##=(const FFixedVector& V) { X O##= V.X; Y O##= V.Y; Z O##= V.Z; return *this; } FIXED_NAS_OP(O)
-
-	FIXED_BIN_OP(+)
-	FIXED_BIN_OP(-)
-	FIXED_BIN_OP(*)
-	FIXED_BIN_OP(/)
-
-#undef FIXED_BIN_OP
-#undef FIXED_NAS_OP
-
-	FORCEINLINE FFixedVector operator -() const { return FFixedVector(-X, -Y, -Z); }
-	FORCEINLINE bool operator ==(const FFixedVector& V) const { return (X == V.X) && (Y == V.Y) && (Z == V.Z); }
-	FORCEINLINE bool operator !=(const FFixedVector& V) const { return (X != V.X) || (Y != V.Y) || (Z != V.Z); }
-
-	FORCEINLINE FFixed& operator [](int32 Index) { check(Index >= 0 && Index < 3); return (&X)[Index]; }
-	FORCEINLINE FFixed operator [](int32 Index) const { check(Index >= 0 && Index < 3); return (&X)[Index]; }
-
 	FORCEINLINE bool IsZero() const { return X == 0 && Y == 0 && Z == 0; }
 	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(LengthSquared()); }
 	FORCEINLINE FFixed LengthSquared() const { return X * X + Y * Y + Z * Z; }
 	FORCEINLINE bool Normalize();
+
+	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& V) { *this = *this ^ V; return *this; }
+	FORCEINLINE FFixedVector operator ^(const FFixedVector& V) const { return FFixedVector(Y * V.Z - Z * V.Y, Z * V.X - X * V.Z, X * V.Y - Y * V.X); }
+	FORCEINLINE FFixed operator |(const FFixedVector& V) const { return X * V.X + Y * V.Y + Z * V.Z; }
+
+	FORCEINLINE FFixedVector operator -() const { return FFixedVector(-X, -Y, -Z); }
+	FORCEINLINE bool operator ==(const FFixedVector& V) const { return (X == V.X) && (Y == V.Y) && (Z == V.Z); }
+	FORCEINLINE bool operator !=(const FFixedVector& V) const { return (X != V.X) || (Y != V.Y) || (Z != V.Z); }
+	friend FORCEINLINE FFixedVector operator +(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(A.X + B.X, A.Y + B.Y, A.Z + B.Z); }
+	friend FORCEINLINE FFixedVector operator -(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(A.X - B.X, A.Y - B.Y, A.Z - B.Z); }
+	friend FORCEINLINE FFixedVector operator *(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(A.X * B.X, A.Y * B.Y, A.Z * B.Z); }
+	friend FORCEINLINE FFixedVector operator /(const FFixedVector& A, const FFixedVector& B) { return FFixedVector(A.X / B.X, A.Y / B.Y, A.Z / B.Z); }
+	FORCEINLINE FFixedVector operator /(FFixed Scale) const { return FFixedVector(X / Scale, Y / Scale, Z / Scale); }
+	FORCEINLINE FFixedVector operator *(FFixed Scale) const { return FFixedVector(X * Scale, Y * Scale, Z * Scale); }
+	FORCEINLINE FFixedVector& operator +=(const FFixedVector& V) { X += V.X; Y += V.Y; Z += V.Z; return *this; }
+	FORCEINLINE FFixedVector& operator -=(const FFixedVector& V) { X -= V.X; Y -= V.Y; Z -= V.Z; return *this; }
+	FORCEINLINE FFixedVector& operator *=(const FFixedVector& V) { X *= V.X; Y *= V.Y; Z *= V.Z; return *this; }
+	FORCEINLINE FFixedVector& operator /=(const FFixedVector& V) { X /= V.X; Y /= V.Y; Z /= V.Z; return *this; }
+	FORCEINLINE FFixedVector& operator *=(FFixed Scale) { X *= Scale; Y *= Scale; Z *= Scale; return *this; }
+	FORCEINLINE FFixedVector& operator /=(FFixed Scale) { X /= Scale; Y /= Scale; Z /= Scale; return *this; }
+
+	FORCEINLINE FFixed& operator [](int32 Index) { check(Index >= 0 && Index < 3); return (&X)[Index]; }
+	FORCEINLINE FFixed operator [](int32 Index) const { check(Index >= 0 && Index < 3); return (&X)[Index]; }
 };
 
 namespace FFixedMath
@@ -94,7 +95,9 @@ FORCEINLINE bool FFixedVector::Normalize()
 	}
 
 	FFixed Length = FFixedMath::Sqrt(SquareSum);
-	if (Length > 0) {
+
+	if (Length > 0)
+	{
 		*this /= Length;
 		return true;
 	}
