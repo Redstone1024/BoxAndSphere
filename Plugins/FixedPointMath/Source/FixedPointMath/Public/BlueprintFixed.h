@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Fixed.h"
+#include "FixedPlane.h"
 #include "FixedVector.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "FixedRotator.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "BlueprintFixed.generated.h"
 
 UCLASS(meta = (BlueprintThreadSafe, ScriptName = "FixedMathLibrary"))
@@ -241,4 +242,13 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Lerp (FixedRotator)", ScriptMethod = "Lerp"), Category = "Math|FixedRotator")
 	static FORCEINLINE FFixedRotator Lerp_FixedRotator(const FFixedRotator& A, const FFixedRotator& B, FFixed Alpha) { return FFixedMath::LerpRotator(A, B, Alpha); }
+
+	// 平面：
+	// 类型转换
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "ToFixedPlane (Plane)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast), Category = "Math|Conversions")
+	static FORCEINLINE FFixedPlane Conv_PlaneToFixedPlane(const FPlane& InPlane) { return static_cast<FFixedPlane>(InPlane); }
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "ToPlane (FixedPlane)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast), Category = "Math|Conversions")
+	static FORCEINLINE FPlane Conv_FixedPlaneToPlane(const FFixedPlane& InPlane) { return FPlane(InPlane); }
 };
