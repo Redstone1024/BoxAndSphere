@@ -187,10 +187,10 @@ public:
 	static FORCEINLINE FFixed Dot_FixedVectorFixedVector(const FFixedVector& A, const FFixedVector& B) { return FFixedMath::DotProduct(A, B); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "VectorLength", ScriptMethod = "Length", Keywords = "magnitude"), Category = "Math|FixedVector")
-	static FORCEINLINE FFixed Length_FixedVector(const FFixedVector& A) { return A.Length(); }
+	static FORCEINLINE FFixed Length_FixedVector(const FFixedVector& A) { return A.Size(); }
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "VectorLengthSquared", ScriptMethod = "LengthSquared", Keywords = "magnitude"), Category = "Math|FixedVector")
-	static FORCEINLINE FFixed LengthSquared_FixedVector(const FFixedVector& A) { return A.LengthSquared(); }
+	static FORCEINLINE FFixed LengthSquared_FixedVector(const FFixedVector& A) { return A.SizeSquared(); }
 
 	UFUNCTION(BlueprintPure, meta = (ScriptMethod = "IsZero"), Category = "Math|FixedVector")
 	static FORCEINLINE bool IsZero_FixedVector(const FFixedVector& A) { return A.IsZero(); }

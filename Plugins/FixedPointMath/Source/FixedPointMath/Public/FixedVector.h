@@ -40,8 +40,8 @@ struct FIXEDPOINTMATH_API FFixedVector
 	explicit FORCEINLINE operator FIntVector() const { return FIntVector(static_cast<int32>(X), static_cast<int32>(Y), static_cast<int32>(Z)); }
 
 	FORCEINLINE bool IsZero() const { return X == 0 && Y == 0 && Z == 0; }
-	FORCEINLINE FFixed Length() const { return FFixedMath::Sqrt(LengthSquared()); }
-	FORCEINLINE FFixed LengthSquared() const { return X * X + Y * Y + Z * Z; }
+	FORCEINLINE FFixed Size() const { return FFixedMath::Sqrt(SizeSquared()); }
+	FORCEINLINE FFixed SizeSquared() const { return X * X + Y * Y + Z * Z; }
 	FORCEINLINE bool Normalize();
 
 	FORCEINLINE FFixedVector& operator ^=(const FFixedVector& V) { *this = *this ^ V; return *this; }
@@ -86,7 +86,7 @@ namespace FFixedMath
 
 FORCEINLINE bool FFixedVector::Normalize()
 {
-	FFixed SquareSum = LengthSquared();
+	FFixed SquareSum = SizeSquared();
 
 	if (SquareSum < 0)
 	{

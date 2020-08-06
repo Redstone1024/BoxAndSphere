@@ -53,7 +53,7 @@ struct FIXEDPOINTMATH_API FFixedPlane
 
 FORCEINLINE bool FFixedPlane::Normalize()
 {
-	FFixed SquareSum = LengthSquared();
+	FFixed SquareSum = SizeSquared();
 
 	if (SquareSum < 0)
 	{
