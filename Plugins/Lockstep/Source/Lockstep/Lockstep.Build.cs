@@ -38,6 +38,7 @@ public class Lockstep : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+                "Networking",
                 "NetworkByteStream",
 				// ... add private dependencies that you statically link with here ...	
 			}
