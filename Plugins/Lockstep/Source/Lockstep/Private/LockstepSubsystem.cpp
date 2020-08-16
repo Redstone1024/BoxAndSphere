@@ -258,6 +258,8 @@ void ULockstepSubsystem::InitializeStructTable()
 {
 	TArray<UScriptStruct*> EventStructs;
 	UScriptStruct* LockstepEventStruct = FLockstepEvent::StaticStruct();
+
+	// 获取C++中定义的Lockstep事件
 	if (LockstepEventStruct)
 	{
 		for (TObjectIterator<UScriptStruct> It; It; ++It)
@@ -270,6 +272,7 @@ void ULockstepSubsystem::InitializeStructTable()
 		}
 	}
 
+	// 获取蓝图中定义的Lockstep事件
 	if (bTreatUserDefinedStructAsEvent)
 	{
 		UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(UUserDefinedStruct::StaticClass(), false, GIsEditor);
@@ -286,6 +289,7 @@ void ULockstepSubsystem::InitializeStructTable()
 		}
 	}
 
+	// 保证事件顺序的确定性
 	EventStructs.Sort(
 		[] (const UScriptStruct& A, const UScriptStruct& B) 
 		{ 
@@ -294,8 +298,10 @@ void ULockstepSubsystem::InitializeStructTable()
 				: A.GetPathName() < B.GetPathName(); 
 		});
 
+	// 空出系统事件
 	NetStructTable.Init(nullptr, 16);
 	
+	// 注册之前收集的事件
 	for (UScriptStruct* Struct : EventStructs)
 	{
 		int32 Index = NetStructTable.Add(Struct);
@@ -451,14 +457,17 @@ void ULockstepSubsystem::HandlingUserEvent(const FEvent & Event)
 	FLockstepEventDelegates& EventDelegates = NetDelegatesTable[Event.CMD];
 	FLockstepEventDynamicDelegates& EventDynamicDelegates = NetDynamicDelegatesTable[Event.CMD];
 
+	// 反序列化构造
 	void* EventParams = FMemory::Malloc(EventStruct->GetStructureSize());
 	EventStruct->InitializeStruct(EventParams);
 	FMemoryReader Reader(Event.Params);
 	EventStruct->SerializeItem(Reader, EventParams, nullptr);
 
+	// 调用回调
 	EventDelegates.Broadcast(Event.ID, EventParams);
 	EventDynamicDelegates.Broadcast(Event.ID, { EventStruct, EventParams });
 
+	// 释放内存
 	FMemory::Free(EventParams);
 }
 
