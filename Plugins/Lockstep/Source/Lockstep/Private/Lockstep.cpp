@@ -1,6 +1,8 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
 #include "Lockstep.h"
+#include "LockstepSubsystem.h"
+#include "Developer/Settings/Public/ISettingsModule.h"
 
 DEFINE_LOG_CATEGORY(LogLockstep);
 
@@ -8,13 +10,22 @@ DEFINE_LOG_CATEGORY(LogLockstep);
 
 void FLockstepModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	if (ISettingsModule* SettingModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingModule->RegisterSettings("Project", "Plugins", "Lockstep",
+			LOCTEXT("RuntimeSettingsName", "Lockstep"),
+			LOCTEXT("RuntimeSettingsDescription", "Configure the Lockstep plugin"),
+			GetMutableDefault<ULockstepSubsystem>()
+		);
+	}
 }
 
 void FLockstepModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "Lockstep");
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
