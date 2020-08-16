@@ -53,7 +53,7 @@ public:
 	static void BindEventDelegate(const UObject* WorldContextObject, UScriptStruct* EventType, FLockstepEventDynamicDelegate Event);
 
 	UFUNCTION(BlueprintCallable, Category = "Lockstep", meta = (WorldContext = "WorldContextObject"))
-	static void BindErrorDelegate(const UObject* WorldContextObject, UScriptStruct* EventType, FLockstepErrorDynamicDelegate Event);
+	static void BindErrorDelegate(const UObject* WorldContextObject, FLockstepErrorDynamicDelegate Event);
 
 	UFUNCTION(BlueprintPure, Category = "Lockstep", meta = (CustomStructureParam = "Event", AutoCreateRefTerm = "Event"), CustomThunk)
 	static void DereferenceEventPtr(const FLockstepEventPtr& EventPtr, int32& Event, bool& bSuccess) { }

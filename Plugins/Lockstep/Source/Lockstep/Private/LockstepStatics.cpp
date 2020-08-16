@@ -93,7 +93,7 @@ void ULockstepStatics::BindEventDelegate(const UObject * WorldContextObject, USc
 	LockstepSubsystem->BindEventDynamicDelegate(EventType, Event);
 }
 
-void ULockstepStatics::BindErrorDelegate(const UObject * WorldContextObject, UScriptStruct * EventType, FLockstepErrorDynamicDelegate Event)
+void ULockstepStatics::BindErrorDelegate(const UObject * WorldContextObject, FLockstepErrorDynamicDelegate Event)
 {
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	ULockstepSubsystem* LockstepSubsystem = GameInstance->GetSubsystem<ULockstepSubsystem>();
