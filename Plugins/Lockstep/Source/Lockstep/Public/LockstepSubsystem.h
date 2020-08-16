@@ -62,8 +62,8 @@ enum class ELockstepNetMode : uint8
 USTRUCT(BlueprintInternalUseOnly)
 struct LOCKSTEP_API FLockstepEvent { GENERATED_BODY() };
 
-DECLARE_DELEGATE_TwoParams(FLockstepEventDelegate, int32, void*);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FLockstepEventDelegates, int32, void*);
+DECLARE_DELEGATE_TwoParams(FLockstepEventDelegate, int32, const void*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FLockstepEventDelegates, int32, const void*);
 
 DECLARE_DELEGATE_TwoParams(FLockstepTickDelegate, int32, int32);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FLockstepTickDelegates, int32, int32);
@@ -76,11 +76,11 @@ struct LOCKSTEP_API FLockstepEventPtr
 	UPROPERTY(BlueprintReadOnly, Category = "Lockstep")
 	UScriptStruct* EventStruct;
 
-	void* RawPtr;
+	const void* RawPtr;
 };
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepEventDynamicDelegate, int32, EventID, FLockstepEventPtr, Params);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepEventDynamicDelegates, int32, EventID, FLockstepEventPtr, Params);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepEventDynamicDelegate, int32, EventID, const FLockstepEventPtr&, Params);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepEventDynamicDelegates, int32, EventID, const FLockstepEventPtr&, Params);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FLockstepTickDynamicDelegate, int32, EventID, int32, TickID);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLockstepTickDynamicDelegates, int32, EventID, int32, TickID);
