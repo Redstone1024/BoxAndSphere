@@ -20,6 +20,7 @@ void USmallGridMapConfig::UpdateSetting()
 		Size = FIntVector(16, 16, 1); 
 		StaticCollisionFlags.Init(0, 16 * 16 * 1);
 		LoadInformation = TEXT("Settings are set to default.");
+		return;
 	}
 
 	int32 Index = 0;
