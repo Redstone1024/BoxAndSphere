@@ -4,8 +4,10 @@
 #include "SmallGridMapSubsystem.h"
 
 #include "Engine/World.h"
+#include "GridPathFinder.h"
 #include "SmallGridMapConfig.h"
 #include "GridAgentComponent.h"
+#include "GridPathFinder/AStarGridPathFinder.h"
 
 namespace
 {
@@ -46,4 +48,6 @@ void USmallGridMapSubsystem::Initialize(FSubsystemCollectionBase & Collection)
 	OutsideNode.StaticCollisionFlags = -1;
 	Agents.Init(nullptr, Size.X * Size.Y * Size.Z);
 	DynamicCollisionFlags.Init(0, Size.X * Size.Y * Size.Z);
+
+	PathFinder = NewObject<UGridPathFinder>(this, UAStarGridPathFinder::StaticClass());
 }

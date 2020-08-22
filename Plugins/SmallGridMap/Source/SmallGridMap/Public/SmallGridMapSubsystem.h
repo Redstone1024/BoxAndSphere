@@ -6,6 +6,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "SmallGridMapSubsystem.generated.h"
 
+class UGridPathFinder;
 class UGridAgentComponent;
 
 USTRUCT(BlueprintType)
@@ -64,12 +65,17 @@ public:
 	void SetDynamicCollisionFlags(FIntVector Location, int64 CollisionFlags)
 	{ if (IsValidLocation(Location)) DynamicCollisionFlags[GetLocationIndex(Location)] = CollisionFlags; }
 
+	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
+	UGridPathFinder* GetPathFinder() const { return PathFinder; }
+
 private:
 	UPROPERTY() FIntVector Size;
 	UPROPERTY() FGridMapNode OutsideNode;
 	UPROPERTY() TArray<int64> StaticCollisionFlags;
 	UPROPERTY() TArray<int64> DynamicCollisionFlags;
 	UPROPERTY() TArray<TWeakObjectPtr<UGridAgentComponent>> Agents;
+
+	UPROPERTY() UGridPathFinder* PathFinder;
 
 public:
 	//~ Begin USubsystem Interface
