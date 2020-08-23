@@ -67,7 +67,7 @@ private:
 	TArray<FIntVector> CollisionRange;
 
 public:
-	//~ Begin USubsystem Interface
+	//~ Begin UActorComponent Interface
 	virtual void BeginPlay() override;
-	//~ End USubsystem Interface
+	//~ End UActorComponent Interface
 };
