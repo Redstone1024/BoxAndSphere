@@ -18,7 +18,6 @@ class SMALLGRIDMAP_API UAStarGridPathFinder : public UGridPathFinder
 public:
 	UAStarGridPathFinder(const FObjectInitializer& ObjectInitializer);
 
-protected:
 	virtual bool FindPath(UGridAgentComponent* Agent, FIntVector Target, FGridPathFindingResult& Result) final;
 	
 private:

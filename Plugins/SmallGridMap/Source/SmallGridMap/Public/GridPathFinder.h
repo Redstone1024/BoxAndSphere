@@ -34,7 +34,7 @@ class SMALLGRIDMAP_API UGridPathFinder : public UObject
 
 	friend USmallGridMapSubsystem;
 
-protected:
+public:
 	UFUNCTION(BlueprintCallable, Category = "Small Grid Map", BlueprintPure = false)
 	virtual bool FindPath(UGridAgentComponent* Agent, FIntVector Target, FGridPathFindingResult& Result) PURE_VIRTUAL(UGridPathFinder::FindPath, return false;);
 };
