@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Fixed.h"
 #include "UObject/NoExportTypes.h"
 #include "GridPathFinder.generated.h"
 
@@ -18,7 +19,7 @@ struct FGridPathFindingResult
 	bool bSuccess;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Small Grid Map")
-	int32 Length;
+	FFixed Length;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Small Grid Map")
 	TArray<FIntVector> Path;

@@ -38,6 +38,7 @@ public class SmallGridMap : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+                "FixedPointMath",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

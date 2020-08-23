@@ -85,8 +85,8 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 				continue;
 			}
 
-			int Cost = (Direction[i].X != 0) + (Direction[i].Y != 0) + (Direction[i].Z != 0);
-			Cost = Cost == 3 ? 17 : Cost == 2 ? 14 : 10;
+			FFixed Cost = (Direction[i].X != 0) + (Direction[i].Y != 0) + (Direction[i].Z != 0);
+			Cost = Cost == 3 ? FFixed::FromBit(7094) : Cost == 2 ? FFixed::FromBit(5793) : FFixed::FromBit(4096);
 			Cost += ToOpen->Cost;
 
 			FOpenPoint* NewPoint = &PointList[PointList.Add({ Neighbor, Cost, 0, ToOpen })];
@@ -114,7 +114,7 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 				Relative.Y = Temp;
 			}
 
-			NewPoint->Pred = Relative.X * 3 + Relative.Y * 4 + Relative.Z * 10 + Cost;
+			NewPoint->Pred = Relative.X * FFixed::FromBit(1301) + Relative.Y * FFixed::FromBit(1697) + Relative.Z * FFixed::FromBit(4096) + Cost;
 
 			OpenList.push(NewPoint);
 		}

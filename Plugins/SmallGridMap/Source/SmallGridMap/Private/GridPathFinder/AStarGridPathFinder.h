@@ -27,8 +27,8 @@ private:
 	{
 		FIntVector Location;
 
-		int32 Cost;
-		int32 Pred;
+		FFixed Cost;
+		FFixed Pred;
 
 		FOpenPoint* Father;
 	};
