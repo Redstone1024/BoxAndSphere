@@ -79,9 +79,7 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 
 			if (!GridSubsystem->IsValidLocation(Neighbor)) continue;
 			if (CloseList[GridSubsystem->GetLocationIndex(Neighbor)] == CloseNumber) continue;
-			if ((GridSubsystem->GetStaticCollisionFlags(Neighbor)
-				| GridSubsystem->GetDynamicCollisionFlags(Neighbor))
-				& Agent->GetCollisionFlags())
+			if (Agent->IsBlockPath(Neighbor))
 			{
 				Result.Barriers.Add(Neighbor);
 				continue;

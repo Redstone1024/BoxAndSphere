@@ -194,6 +194,20 @@ bool UGridAgentComponent::SetCollisionRange(const TArray<FIntVector>& InCollisio
 	return true;
 }
 
+bool UGridAgentComponent::IsBlockPath(FIntVector Location) const
+{
+	int64 NodeCollisionFlags = 0;
+	for (const FIntVector& CollisionOffset : CollisionRange)
+	{
+		const FIntVector CollisionLocation = Location + CollisionOffset;
+		const FGridMapNode& MapNode = GridSubsystem->GetNode(CollisionLocation);
+		NodeCollisionFlags |= MapNode.StaticCollisionFlags;
+		NodeCollisionFlags |= MapNode.DynamicCollisionFlags;
+	}
+
+	return NodeCollisionFlags & CollisionFlags;
+}
+
 void UGridAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();

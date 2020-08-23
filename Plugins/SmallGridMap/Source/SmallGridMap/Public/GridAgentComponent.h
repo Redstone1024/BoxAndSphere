@@ -51,6 +51,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Small Grid Map")
 	bool SetCollisionRange(const TArray<FIntVector>& InCollisionRange, EGridAgentClashMode ClashMode = EGridAgentClashMode::Passive, bool bOnlyTrace = false);
 
+	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
+	bool IsBlockPath(FIntVector Location) const;
+
 private:
 	UPROPERTY() USmallGridMapSubsystem* GridSubsystem;
 
