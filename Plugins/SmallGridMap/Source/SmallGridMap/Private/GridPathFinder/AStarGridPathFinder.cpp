@@ -6,83 +6,6 @@
 #include "GridAgentComponent.h"
 #include "SmallGridMapSubsystem.h"
 
-class FAStarGridPathFinder
-{
-	friend UAStarGridPathFinder;
-
-	//是否在障碍物或者关闭列表
-	static FORCEINLINE bool InBarrierOrCloseList(UAStarGridPathFinder* Finder, const FIntVector& A, UGridAgentComponent* Agent) {
-		if (!Finder->GridSubsystem->IsValidLocation(A)) return true;
-		if ((Finder->GridSubsystem->GetStaticCollisionFlags(A) | Finder->GridSubsystem->GetDynamicCollisionFlags(A)) & Agent->GetCollisionFlags()) return true;
-		return Finder->CloseList[Finder->GridSubsystem->GetLocationIndex(A)] == Finder->CloseNumber;
-	}
-
-	//创建一个开启点
-	static FORCEINLINE UAStarGridPathFinder::FOpenPoint* CreateOpenPoint(UAStarGridPathFinder* Finder, const FIntVector& A, const FIntVector& Target, int32 Cost, UAStarGridPathFinder::FOpenPoint* Father)
-	{
-		UAStarGridPathFinder::FOpenPoint& Result =
-			Finder->PointList[Finder->PointList.Add(UAStarGridPathFinder::FOpenPoint())];
-
-		Result.Location = A;
-		Result.Cost = Cost;
-		Result.Father = Father;
-
-		FIntVector Relative;
-		Relative.X = FMath::Abs(Target.X - A.X);
-		Relative.Y = FMath::Abs(Target.Y - A.Y);
-		Relative.Z = FMath::Abs(Target.Z - A.Z);
-
-		int32 Temp;
-
-		if (Relative.X > Relative.Y)
-		{
-			Temp = Relative.X;
-			Relative.X = Relative.Y;
-			Relative.Y = Temp;
-		}
-
-		if (Relative.Y > Relative.Z)
-		{
-			Temp = Relative.Y;
-			Relative.Y = Relative.Z;
-			Relative.Z = Temp;
-		}
-
-		if (Relative.X > Relative.Y)
-		{
-			Temp = Relative.X;
-			Relative.X = Relative.Y;
-			Relative.Y = Temp;
-		}
-
-		Result.Pred = Relative.X * 3 + Relative.Y * 4 + Relative.Z * 10 + Cost;
-
-		return &Result;
-	}
-
-	// 开启检查，检查父节点
-	static FORCEINLINE void Open(UAStarGridPathFinder* Finder, UAStarGridPathFinder::FOpenPoint* PointToOpen, const FIntVector& Target, UGridAgentComponent* Agent)
-	{
-		if (InBarrierOrCloseList(Finder, PointToOpen->Location, Agent)) return;
-
-		for (int i = 0; i < UAStarGridPathFinder::DirectionNum; ++i)
-		{
-			FIntVector Neighbor = PointToOpen->Location + UAStarGridPathFinder::Direction[i];
-			if (!InBarrierOrCloseList(Finder, Neighbor, Agent))
-			{
-				int Cost =
-					(UAStarGridPathFinder::Direction[i].X != 0) +
-					(UAStarGridPathFinder::Direction[i].Y != 0) +
-					(UAStarGridPathFinder::Direction[i].Z != 0);
-				Cost = Cost == 3 ? 17 : Cost == 2 ? 14 : 10;
-				Finder->OpenList.push(CreateOpenPoint(Finder, Neighbor, Target, PointToOpen->Cost + Cost, PointToOpen));
-			}
-		}
-
-		Finder->CloseList[Finder->GridSubsystem->GetLocationIndex(PointToOpen->Location)] = Finder->CloseNumber;
-	}
-};
-
 const FIntVector UAStarGridPathFinder::Direction[] = 
 {
 	{ -1, -1, -1 }, { -1, -1,  0 }, { -1, -1,  1 },
@@ -120,11 +43,15 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 	Result.bSuccess = false;
 	Result.Length = -1;
 	Result.Path.SetNum(0, false);
+	Result.Barriers.SetNum(0, false);
 
 	PointList.SetNum(0, false);
 
-	OpenList.push(FAStarGridPathFinder::CreateOpenPoint(this, Agent->GetGridLocation(), Target, 0, nullptr));
+	OpenList.push(&PointList[PointList.Add({ Agent->GetGridLocation(), 0, 0, nullptr })]);
 
+	int32 Temp;
+	FIntVector Neighbor;
+	FIntVector Relative;
 	FOpenPoint* ToOpen = nullptr;
 
 	while (!OpenList.empty())
@@ -143,7 +70,56 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 			break;
 		}
 
-		FAStarGridPathFinder::Open(this, ToOpen, Target, Agent);
+		if (CloseList[GridSubsystem->GetLocationIndex(ToOpen->Location)] == CloseNumber) continue;
+		CloseList[GridSubsystem->GetLocationIndex(ToOpen->Location)] = CloseNumber;
+
+		for (int i = 0; i < DirectionNum; ++i)
+		{
+			Neighbor = ToOpen->Location + Direction[i];
+
+			if (!GridSubsystem->IsValidLocation(Neighbor)) continue;
+			if (CloseList[GridSubsystem->GetLocationIndex(Neighbor)] == CloseNumber) continue;
+			if ((GridSubsystem->GetStaticCollisionFlags(Neighbor)
+				| GridSubsystem->GetDynamicCollisionFlags(Neighbor))
+				& Agent->GetCollisionFlags())
+			{
+				Result.Barriers.Add(Neighbor);
+				continue;
+			}
+
+			int Cost = (Direction[i].X != 0) + (Direction[i].Y != 0) + (Direction[i].Z != 0);
+			Cost = Cost == 3 ? 17 : Cost == 2 ? 14 : 10;
+			Cost += ToOpen->Cost;
+
+			FOpenPoint* NewPoint = &PointList[PointList.Add({ Neighbor, Cost, 0, ToOpen })];
+
+			Relative.X = FMath::Abs(Target.X - Neighbor.X);
+			Relative.Y = FMath::Abs(Target.Y - Neighbor.Y);
+			Relative.Z = FMath::Abs(Target.Z - Neighbor.Z);
+
+			if (Relative.X > Relative.Y)
+			{
+				Temp = Relative.X;
+				Relative.X = Relative.Y;
+				Relative.Y = Temp;
+			}
+			if (Relative.Y > Relative.Z)
+			{
+				Temp = Relative.Y;
+				Relative.Y = Relative.Z;
+				Relative.Z = Temp;
+			}
+			if (Relative.X > Relative.Y)
+			{
+				Temp = Relative.X;
+				Relative.X = Relative.Y;
+				Relative.Y = Temp;
+			}
+
+			NewPoint->Pred = Relative.X * 3 + Relative.Y * 4 + Relative.Z * 10 + Cost;
+
+			OpenList.push(NewPoint);
+		}
 	}
 
 	if (Result.bSuccess)

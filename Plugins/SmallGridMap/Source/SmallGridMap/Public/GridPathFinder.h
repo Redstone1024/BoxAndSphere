@@ -22,6 +22,9 @@ struct FGridPathFindingResult
 
 	UPROPERTY(BlueprintReadOnly, Category = "Small Grid Map")
 	TArray<FIntVector> Path;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Small Grid Map")
+	TArray<FIntVector> Barriers;
 };
 
 UCLASS(Abstract, Within = "SmallGridMapSubsystem")

@@ -15,8 +15,6 @@ class SMALLGRIDMAP_API UAStarGridPathFinder : public UGridPathFinder
 {
 	GENERATED_BODY()
 
-	friend FAStarGridPathFinder;
-
 public:
 	UAStarGridPathFinder(const FObjectInitializer& ObjectInitializer);
 
