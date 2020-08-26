@@ -40,10 +40,16 @@ class SMALLGRIDMAP_API UGridAgentHelper : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
-	static int32 GridDirectionToAngle(EGridAgentDirection InGridDirection) { return (int32)InGridDirection * 45; };
+	static int32 GridDirectionToAngle(EGridAgentDirection InGridDirection) { return (int32)InGridDirection * 45; }
 
 	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
-	static EGridAgentDirection AngleToGridDirection(int32 InAngle) { InAngle %= 360; if (InAngle < 360) InAngle += 360; InAngle /= 45; return (EGridAgentDirection)InAngle; }
+	static EGridAgentDirection AngleToGridDirection(int32 InAngle) { InAngle %= 360; if (InAngle < 0) InAngle += 360; InAngle /= 45; return (EGridAgentDirection)InAngle; }
+
+	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
+	static FIntVector GridDirectionToVector(EGridAgentDirection InGridDirection);
+
+	UFUNCTION(BlueprintPure, Category = "Small Grid Map")
+	static EGridAgentDirection VectorToGridDirection(FIntVector InVector);
 };
 
 UCLASS(ClassGroup = "SmallGridMap", HideCategories = ("Activation", "Collision", "ComponentReplication"), meta = (BlueprintSpawnableComponent))

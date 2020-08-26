@@ -6,6 +6,40 @@
 #include "Engine/World.h"
 #include "SmallGridMapSubsystem.h"
 
+FIntVector UGridAgentHelper::GridDirectionToVector(EGridAgentDirection InGridDirection)
+{
+	switch (InGridDirection)
+	{
+	case EGridAgentDirection::TN: return FIntVector(1, 0, 0);
+	case EGridAgentDirection::TS: return FIntVector(-1, 0, 0);
+	case EGridAgentDirection::TW: return FIntVector(0, -1, 0);
+	case EGridAgentDirection::TE: return FIntVector(0, 1, 0);
+	case EGridAgentDirection::NW: return FIntVector(1, -1, 0);
+	case EGridAgentDirection::NE: return FIntVector(1, 1, 0);
+	case EGridAgentDirection::SW: return FIntVector(-1, -1, 0);
+	case EGridAgentDirection::SE: return FIntVector(-1, 1, 0);
+	default: checkNoEntry();
+	}
+
+	return FIntVector();
+}
+
+EGridAgentDirection UGridAgentHelper::VectorToGridDirection(FIntVector InVector)
+{
+	if (InVector.IsZero()) return EGridAgentDirection();
+	if (InVector.X > 0 && InVector.Y == 0) return EGridAgentDirection::TN;
+	if (InVector.X < 0 && InVector.Y == 0) return EGridAgentDirection::TS;
+	if (InVector.X == 0 && InVector.Y < 0) return EGridAgentDirection::TW;
+	if (InVector.X == 0 && InVector.Y > 0) return EGridAgentDirection::TE;
+	if (InVector.X > 0 && InVector.Y < 0) return EGridAgentDirection::NW;
+	if (InVector.X > 0 && InVector.Y > 0) return EGridAgentDirection::NE;
+	if (InVector.X < 0 && InVector.Y < 0) return EGridAgentDirection::SW;
+	if (InVector.X < 0 && InVector.Y > 0) return EGridAgentDirection::SE;
+
+	checkNoEntry();
+	return EGridAgentDirection();
+}
+
 UGridAgentComponent::UGridAgentComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
