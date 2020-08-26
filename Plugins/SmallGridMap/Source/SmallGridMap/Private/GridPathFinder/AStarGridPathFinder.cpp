@@ -126,6 +126,8 @@ bool UAStarGridPathFinder::FindPath(UGridAgentComponent * Agent, FIntVector Targ
 
 		for (FOpenPoint* RS = ToOpen; RS; RS = RS->Father)
 			Result.Path.Add(RS->Location);
+
+		Algo::Reverse(Result.Path);
 	}
 
 	++CloseNumber;
